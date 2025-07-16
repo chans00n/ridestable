@@ -13,12 +13,12 @@ try {
   process.exit(1);
 }
 
-// Create @stable-ride/shared module
-console.log('Creating shared module...');
+// Copy @stable-ride/shared module
+console.log('Setting up shared module...');
 try {
-  execSync('node scripts/create-shared-module.js', { stdio: 'inherit' });
+  execSync('node scripts/copy-shared-module.js', { stdio: 'inherit' });
 } catch (error) {
-  console.error('Failed to create shared module:', error.message);
+  console.error('Failed to setup shared module:', error.message);
   process.exit(1);
 }
 
