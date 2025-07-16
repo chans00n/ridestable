@@ -61,3 +61,7 @@ stable-ride-driver/
 
 # Bundled shared types (generated during build)
 backend/src/shared/
+
+# Backup files created during build
+*.original
+*.original.ts

@@ -13,12 +13,12 @@ try {
   process.exit(1);
 }
 
-// Copy @stable-ride/shared module
-console.log('Setting up shared module...');
+// Inline shared imports for Vercel
+console.log('Inlining shared imports...');
 try {
-  execSync('node scripts/copy-shared-module.js', { stdio: 'inherit' });
+  execSync('node scripts/inline-shared-imports.js', { stdio: 'inherit' });
 } catch (error) {
-  console.error('Failed to setup shared module:', error.message);
+  console.error('Failed to inline shared imports:', error.message);
   process.exit(1);
 }
 
