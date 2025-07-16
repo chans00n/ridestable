@@ -1,16 +1,21 @@
 import { PrismaClient } from '@prisma/client'
 import { logger } from './logger'
 
+// Global prisma instance for serverless environments
+declare global {
+  var prisma: PrismaClient | undefined
+}
+
 // Create Prisma client with explicit database URL to work around permission issues
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:password@127.0.0.1:5432/stable_ride_dev?schema=public'
 
-export const prisma = new PrismaClient({
+export const prisma = global.prisma || new PrismaClient({
   datasources: {
     db: {
       url: DATABASE_URL,
     },
   },
-  log: [
+  log: process.env.NODE_ENV === 'development' ? [
     {
       emit: 'event',
       level: 'query',
@@ -27,8 +32,13 @@ export const prisma = new PrismaClient({
       emit: 'event',
       level: 'warn',
     },
-  ],
+  ] : ['error'],
 })
+
+// Prevent multiple instances in serverless environments
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma
+}
 
 prisma.$on('query', (e) => {
   logger.debug('Query: ' + e.query)
