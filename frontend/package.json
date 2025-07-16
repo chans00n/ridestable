@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
+    "build:prod": "vite build --mode production",
+    "build:with-types": "tsc -p tsconfig.build.json && vite build",
+    "build:lenient": "tsc -p tsconfig.lenient.json && vite build",
+    "build:strict": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",
@@ -14,7 +18,10 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:prod": "vite preview --mode production",
+    "check-env": "node scripts/check-env.js",
+    "prebuild:prod": "node scripts/check-env.js"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",

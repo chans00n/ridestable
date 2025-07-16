@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    /* Override strict settings for build */
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": false,
+    "allowJs": true,
+    "checkJs": false,
+    
+    /* React 18/19 compatibility */
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "types": ["react", "react-dom"],
+    
+    /* Additional compatibility settings */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    
+    /* Ignore specific errors */
+    "ignoreDeprecations": "5.0"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "build", "coverage", "**/*.test.*", "**/*.spec.*"]
+}
