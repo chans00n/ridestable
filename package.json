@@ -21,8 +21,7 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "type-check": "npm run type-check --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:coverage": "npm run test:coverage --workspaces --if-present",
-    "prepare": "husky install"
+    "test:coverage": "npm run test:coverage --workspaces --if-present"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
@@ -32,7 +31,6 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
-    "husky": "^8.0.3",
     "prettier": "^3.2.4",
     "typescript": "^5.3.3"
   },
