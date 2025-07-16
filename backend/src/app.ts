@@ -11,6 +11,11 @@ import routes from './routes'
 
 const app = express()
 
+// Trust proxy headers when deployed to Vercel
+if (process.env.VERCEL) {
+  app.set('trust proxy', true)
+}
+
 app.use(helmet())
 
 // CORS configuration supporting multiple origins

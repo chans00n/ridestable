@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { logger } from './logger'
+import { addConnectionParams } from '../utils/database-url'
 
 // Global prisma instance for serverless environments
 declare global {
@@ -7,7 +8,21 @@ declare global {
 }
 
 // Create Prisma client with explicit database URL to work around permission issues
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:password@127.0.0.1:5432/stable_ride_dev?schema=public'
+let DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:password@127.0.0.1:5432/stable_ride_dev?schema=public'
+
+// Add connection parameters for serverless environment
+if (process.env.VERCEL && process.env.DATABASE_URL) {
+  DATABASE_URL = addConnectionParams(DATABASE_URL)
+}
+
+// Log database configuration for debugging
+if (process.env.VERCEL) {
+  logger.info('Database configuration:', {
+    hasDbUrl: !!process.env.DATABASE_URL,
+    hasDirectUrl: !!process.env.DIRECT_URL,
+    dbHost: DATABASE_URL.split('@')[1]?.split(':')[0] || 'unknown',
+  })
+}
 
 export const prisma = global.prisma || new PrismaClient({
   datasources: {
@@ -33,6 +48,8 @@ export const prisma = global.prisma || new PrismaClient({
       level: 'warn',
     },
   ] : ['error'],
+  // Add connection timeout for serverless
+  datasourceUrl: DATABASE_URL,
 })
 
 // Prevent multiple instances in serverless environments
@@ -51,12 +68,24 @@ prisma.$on('error', (e) => {
 
 export const connectDatabase = async () => {
   try {
-    // Temporary workaround for PostgreSQL 14 connection issue
-    // Skip explicit connection - Prisma will connect on first query
-    logger.info('Database connection initialized (lazy connection)')
+    // Test connection on startup in production
+    if (process.env.NODE_ENV === 'production') {
+      await prisma.$connect()
+      logger.info('Database connected successfully')
+      
+      // Test query
+      const count = await prisma.user.count()
+      logger.info(`Database test query successful - ${count} users found`)
+    } else {
+      // Lazy connection in development
+      logger.info('Database connection initialized (lazy connection)')
+    }
   } catch (error) {
     logger.error('Failed to connect to database:', error)
-    process.exit(1)
+    // Don't exit process in serverless environment
+    if (!process.env.VERCEL) {
+      process.exit(1)
+    }
   }
 }
 
