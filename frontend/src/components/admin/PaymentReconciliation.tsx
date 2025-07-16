@@ -10,7 +10,7 @@ import {
 import { adminApi } from '@/services/adminApi';
 import { showToast } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
 
 interface PaymentReconciliation {
