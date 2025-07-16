@@ -5,15 +5,19 @@ import { prisma } from '../config/database'
 import { config } from './index'
 import { logger } from '../config/logger'
 
-// Google OAuth Strategy
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: config.oauth.google.clientId,
-      clientSecret: config.oauth.google.clientSecret,
-      callbackURL: config.oauth.google.callbackUrl,
-      scope: ['profile', 'email']
-    },
+// Google OAuth Strategy - Only register if credentials are configured
+if (config.oauth.google.clientId && 
+    config.oauth.google.clientId !== '' &&
+    config.oauth.google.clientSecret && 
+    config.oauth.google.clientSecret !== '') {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: config.oauth.google.clientId,
+        clientSecret: config.oauth.google.clientSecret,
+        callbackURL: config.oauth.google.callbackUrl,
+        scope: ['profile', 'email']
+      },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails?.[0]?.value
@@ -136,20 +140,27 @@ passport.use(
         return done(error as Error, false)
       }
     }
+    )
   )
-)
+} else {
+  logger.info('Google OAuth strategy not configured - missing credentials')
+}
 
-// Apple OAuth Strategy
-passport.use(
-  new AppleStrategy(
-    {
-      clientID: config.oauth.apple.clientId,
-      teamID: config.oauth.apple.teamId,
-      keyID: config.oauth.apple.keyId,
-      privateKeyLocation: config.oauth.apple.privateKeyPath,
-      callbackURL: config.oauth.apple.callbackUrl,
-      passReqToCallback: false
-    },
+// Apple OAuth Strategy - Only register if credentials are configured
+if (config.oauth.apple.clientId && 
+    config.oauth.apple.clientId !== 'your-apple-client-id' &&
+    config.oauth.apple.teamId && 
+    config.oauth.apple.teamId !== 'your-apple-team-id') {
+  passport.use(
+    new AppleStrategy(
+      {
+        clientID: config.oauth.apple.clientId,
+        teamID: config.oauth.apple.teamId,
+        keyID: config.oauth.apple.keyId,
+        privateKeyLocation: config.oauth.apple.privateKeyPath,
+        callbackURL: config.oauth.apple.callbackUrl,
+        passReqToCallback: false
+      },
     async (accessToken: string, refreshToken: string, _idToken: any, profile: any, done: any) => {
       try {
         const email = profile.email
@@ -235,8 +246,11 @@ passport.use(
         return done(error as Error, false)
       }
     }
+    )
   )
-)
+} else {
+  logger.info('Apple OAuth strategy not configured - missing credentials')
+}
 
 // Serialize user for session
 passport.serializeUser((user: any, done) => {
