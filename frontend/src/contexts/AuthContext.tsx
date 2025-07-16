@@ -13,7 +13,7 @@ interface AuthContextType {
   loading: boolean
   login: (data: LoginFormData) => Promise<void>
   register: (data: RegisterDto) => Promise<void>
-  loginWithSSO: (provider: 'google' | 'apple') => Promise<void>
+  loginWithSSO: (provider: 'google') => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -87,7 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const loginWithSSO = async (provider: 'google' | 'apple') => {
+  const loginWithSSO = async (provider: 'google') => {
     try {
       const response = await ssoService.authenticateWithPopup(provider)
       if (response.accessToken && response.refreshToken) {

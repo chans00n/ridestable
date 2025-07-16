@@ -1,7 +1,7 @@
 import { api } from './api'
 
 export interface SSOProvider {
-  name: 'google' | 'apple'
+  name: 'google'
   displayName: string
   authUrl?: string
 }
@@ -90,10 +90,6 @@ export const ssoService = {
       {
         name: 'google',
         displayName: 'Google'
-      },
-      {
-        name: 'apple',
-        displayName: 'Apple'
       }
     ]
   }

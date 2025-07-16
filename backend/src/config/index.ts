@@ -41,13 +41,6 @@ export const config = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/callback/google',
     },
-    apple: {
-      clientId: process.env.APPLE_CLIENT_ID || '',
-      teamId: process.env.APPLE_TEAM_ID || '',
-      keyId: process.env.APPLE_KEY_ID || '',
-      privateKeyPath: process.env.APPLE_PRIVATE_KEY_PATH || './keys/apple-private-key.p8',
-      callbackUrl: process.env.APPLE_CALLBACK_URL || 'http://localhost:3000/auth/callback/apple',
-    },
   },
 } as const
 

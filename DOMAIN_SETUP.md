@@ -55,7 +55,6 @@ Add this DNS record:
 CORS_ORIGIN=https://www.ridestable.com,https://ridestable.com,http://localhost:3000
 APP_URL=https://www.ridestable.com
 GOOGLE_CALLBACK_URL=https://www.ridestable.com/auth/callback/google
-APPLE_CALLBACK_URL=https://www.ridestable.com/auth/callback/apple
 ```
 
 ### Frontend (Vercel Dashboard)
@@ -64,7 +63,6 @@ APPLE_CALLBACK_URL=https://www.ridestable.com/auth/callback/apple
 VITE_API_URL=https://api.ridestable.com/api
 VITE_APP_URL=https://www.ridestable.com
 VITE_GOOGLE_REDIRECT_URI=https://www.ridestable.com/auth/callback/google
-VITE_APPLE_REDIRECT_URI=https://www.ridestable.com/auth/callback/apple
 ```
 
 ## OAuth Provider Updates

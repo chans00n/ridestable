@@ -12,7 +12,7 @@ export const getAuthUrl = async (req: Request, res: Response, next: NextFunction
   try {
     const { provider } = req.params
 
-    if (!['google', 'apple'].includes(provider)) {
+    if (provider !== 'google') {
       return res.status(400).json({ error: 'Invalid OAuth provider' })
     }
 
@@ -31,19 +31,6 @@ export const getAuthUrl = async (req: Request, res: Response, next: NextFunction
       return res.json({ authUrl })
     }
 
-    // For Apple, construct the URL
-    if (provider === 'apple') {
-      const params = new URLSearchParams({
-        client_id: config.oauth.apple.clientId,
-        redirect_uri: config.oauth.apple.callbackUrl,
-        response_type: 'code id_token',
-        scope: 'name email',
-        response_mode: 'form_post'
-      })
-      
-      const authUrl = `https://appleid.apple.com/auth/authorize?${params.toString()}`
-      return res.json({ authUrl })
-    }
   } catch (error) {
     logger.error('OAuth URL generation error:', error)
     next(error)
@@ -133,7 +120,7 @@ export const linkProvider = async (req: Request, res: Response, next: NextFuncti
     const { provider } = req.params
     const userId = (req as any).user.userId
 
-    if (!['google', 'apple'].includes(provider)) {
+    if (provider !== 'google') {
       return res.status(400).json({ error: 'Invalid OAuth provider' })
     }
 
@@ -152,9 +139,7 @@ export const linkProvider = async (req: Request, res: Response, next: NextFuncti
     // Initiate OAuth flow for linking
     // This would typically redirect to the OAuth provider
     // For now, we'll return the auth URL
-    const authUrl = provider === 'google' 
-      ? `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.oauth.google.clientId}&redirect_uri=${config.oauth.google.callbackUrl}&response_type=code&scope=profile email&state=link_${userId}`
-      : `https://appleid.apple.com/auth/authorize?client_id=${config.oauth.apple.clientId}&redirect_uri=${config.oauth.apple.callbackUrl}&response_type=code id_token&scope=name email&state=link_${userId}`
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.oauth.google.clientId}&redirect_uri=${config.oauth.google.callbackUrl}&response_type=code&scope=profile email&state=link_${userId}`
 
     res.json({ authUrl })
   } catch (error) {

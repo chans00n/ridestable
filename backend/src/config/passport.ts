@@ -1,6 +1,5 @@
 import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
-import { Strategy as AppleStrategy } from 'passport-apple'
 import { prisma } from '../config/database'
 import { config } from './index'
 import { logger } from '../config/logger'
@@ -146,111 +145,6 @@ if (config.oauth.google.clientId &&
   logger.info('Google OAuth strategy not configured - missing credentials')
 }
 
-// Apple OAuth Strategy - Only register if credentials are configured
-if (config.oauth.apple.clientId && 
-    config.oauth.apple.clientId !== 'your-apple-client-id' &&
-    config.oauth.apple.teamId && 
-    config.oauth.apple.teamId !== 'your-apple-team-id') {
-  passport.use(
-    new AppleStrategy(
-      {
-        clientID: config.oauth.apple.clientId,
-        teamID: config.oauth.apple.teamId,
-        keyID: config.oauth.apple.keyId,
-        privateKeyLocation: config.oauth.apple.privateKeyPath,
-        callbackURL: config.oauth.apple.callbackUrl,
-        passReqToCallback: false
-      },
-    async (accessToken: string, refreshToken: string, _idToken: any, profile: any, done: any) => {
-      try {
-        const email = profile.email
-        const firstName = profile.name?.firstName || ''
-        const lastName = profile.name?.lastName || ''
-
-        if (!email) {
-          return done(new Error('No email found in Apple profile'), false)
-        }
-
-        // Check if OAuth provider already exists
-        const existingProvider = await prisma.oAuthProvider.findUnique({
-          where: {
-            provider_providerId: {
-              provider: 'apple',
-              providerId: profile.id
-            }
-          },
-          include: { user: true }
-        })
-
-        if (existingProvider) {
-          // Update tokens
-          await prisma.oAuthProvider.update({
-            where: { id: existingProvider.id },
-            data: {
-              accessToken,
-              refreshToken: refreshToken || undefined
-            }
-          })
-          return done(null, existingProvider.user)
-        }
-
-        // Check if user exists with this email
-        let user = await prisma.user.findUnique({
-          where: { email }
-        })
-
-        if (!user) {
-          // Create new user
-          user = await prisma.user.create({
-            data: {
-              email,
-              firstName,
-              lastName,
-              emailVerified: true, // OAuth users are considered verified
-              providers: {
-                create: {
-                  provider: 'apple',
-                  providerId: profile.id,
-                  accessToken,
-                  refreshToken: refreshToken || undefined
-                }
-              }
-            }
-          })
-        } else {
-          // Check if OAuth provider is already linked to this user
-          const existingLink = await prisma.oAuthProvider.findFirst({
-            where: {
-              userId: user.id,
-              provider: 'apple'
-            }
-          })
-
-          if (!existingLink) {
-            // Link OAuth provider to existing user
-            await prisma.oAuthProvider.create({
-              data: {
-                userId: user.id,
-                provider: 'apple',
-                providerId: profile.id,
-                accessToken,
-                refreshToken: refreshToken || undefined
-              }
-            })
-          }
-        }
-
-        return done(null, user)
-      } catch (error) {
-        logger.error('Apple OAuth error:', error)
-        return done(error as Error, false)
-      }
-    }
-    )
-  )
-} else {
-  logger.info('Apple OAuth strategy not configured - missing credentials')
-}
 
 // Serialize user for session
 passport.serializeUser((user: any, done) => {
