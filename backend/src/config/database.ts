@@ -25,11 +25,7 @@ if (process.env.VERCEL) {
 }
 
 export const prisma = global.prisma || new PrismaClient({
-  datasources: {
-    db: {
-      url: DATABASE_URL,
-    },
-  },
+  datasourceUrl: DATABASE_URL,
   log: process.env.NODE_ENV === 'development' ? [
     {
       emit: 'event',
@@ -48,8 +44,6 @@ export const prisma = global.prisma || new PrismaClient({
       level: 'warn',
     },
   ] : ['error'],
-  // Add connection timeout for serverless
-  datasourceUrl: DATABASE_URL,
 })
 
 // Prevent multiple instances in serverless environments
