@@ -1,0 +1,90 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Backup Production Database
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create backup
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          # Extract database connection details
+          DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:\/]*\).*/\1/p')
+          DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
+          DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
+          DB_USER=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
+          DB_PASS=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
+          
+          # Create backup filename with timestamp
+          BACKUP_FILE="stable-ride-backup-$(date +%Y%m%d-%H%M%S).sql"
+          
+          # Create backup
+          PGPASSWORD=$DB_PASS pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME > $BACKUP_FILE
+          
+          # Compress and encrypt backup
+          gzip $BACKUP_FILE
+          openssl enc -aes-256-cbc -salt -in "${BACKUP_FILE}.gz" -out "${BACKUP_FILE}.gz.enc" -k $BACKUP_ENCRYPTION_KEY
+          
+          # Store the encrypted backup file for upload
+          echo "BACKUP_FILE=${BACKUP_FILE}.gz.enc" >> $GITHUB_ENV
+
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+        run: |
+          aws s3 cp ${{ env.BACKUP_FILE }} s3://${S3_BUCKET}/database-backups/
+
+      - name: Clean up old backups
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+        run: |
+          # Keep only last 30 days of backups
+          aws s3 ls s3://${S3_BUCKET}/database-backups/ | while read -r line;
+          do
+            createDate=$(echo $line | awk '{print $1" "$2}')
+            createDateSeconds=$(date -d "$createDate" +%s)
+            olderThanSeconds=$(date -d "30 days ago" +%s)
+            if [[ $createDateSeconds -lt $olderThanSeconds ]]; then
+              fileName=$(echo $line | awk '{print $4}')
+              if [[ $fileName != "" ]]; then
+                aws s3 rm s3://${S3_BUCKET}/database-backups/$fileName
+              fi
+            fi
+          done
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Database Backup Failed',
+              body: `The database backup workflow failed. Please check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.`,
+              labels: ['bug', 'critical', 'database']
+            })

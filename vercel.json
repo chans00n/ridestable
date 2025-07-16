@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "backend/src/index.ts": {
+      "maxDuration": 60,
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/src/index.ts"
+    }
+  ]
+}

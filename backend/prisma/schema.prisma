@@ -1,0 +1,806 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                       String                   @id @default(cuid())
+  email                    String                   @unique
+  password                 String?
+  firstName                String                   @map("first_name")
+  lastName                 String                   @map("last_name")
+  phone                    String?
+  emailVerified            Boolean                  @default(false) @map("email_verified")
+  emailVerificationToken   String?                  @unique @map("email_verification_token")
+  emailVerificationExpires DateTime?                @map("email_verification_expires")
+  passwordResetToken       String?                  @unique @map("password_reset_token")
+  passwordResetExpires     DateTime?                @map("password_reset_expires")
+  loginAttempts            Int                      @default(0) @map("login_attempts")
+  lockedUntil              DateTime?                @map("locked_until")
+  lastLoginAt              DateTime?                @map("last_login_at")
+  createdAt                DateTime                 @default(now()) @map("created_at")
+  updatedAt                DateTime                 @updatedAt @map("updated_at")
+  stripeCustomerId         String?                  @unique @map("stripe_customer_id")
+  isDriver                 Boolean?                 @default(false) @map("is_driver")
+  driverLicenseNumber      String?                  @map("driver_license_number") @db.VarChar(100)
+  driverLicenseExpiry      DateTime?                @map("driver_license_expiry") @db.Date
+  vehicleInfo              Json?                    @map("vehicle_info")
+  driverRating             Decimal?                 @map("driver_rating") @db.Decimal(3, 2)
+  totalTrips               Int?                     @default(0) @map("total_trips")
+  driverStatus             DriverStatus?            @default(INACTIVE) @map("driver_status")
+  bookingModifications     BookingModification[]
+  driverBookings           Booking[]                @relation("DriverBookings")
+  bookings                 Booking[]
+  cancellations            Cancellation[]
+  locations                Location[]
+  notificationPreferences  NotificationPreferences?
+  notifications            Notification[]
+  providers                OAuthProvider[]
+  paymentMethods           PaymentMethod[]
+  quotes                   Quote[]
+  refreshTokens            RefreshToken[]
+  savedLocations           SavedLocation[]
+
+  @@map("users")
+}
+
+model Booking {
+  id                    String                 @id @default(cuid())
+  userId                String                 @map("user_id")
+  serviceType           ServiceType            @map("service_type")
+  status                BookingStatus          @default(PENDING)
+  scheduledDateTime     DateTime               @map("scheduled_date_time")
+  pickupAddress         String                 @map("pickup_address")
+  dropoffAddress        String                 @map("dropoff_address")
+  totalAmount           Decimal                @map("total_amount") @db.Decimal(10, 2)
+  notes                 String?
+  confirmationId        String?                @map("confirmation_id")
+  isModified            Boolean                @default(false) @map("is_modified")
+  modificationCount     Int                    @default(0) @map("modification_count")
+  cancellationId        String?                @map("cancellation_id")
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+  driverId              String?                @map("driver_id")
+  modifications         BookingModification[]
+  cancellation          Cancellation?          @relation(fields: [cancellationId], references: [id])
+  confirmation          BookingConfirmation?   @relation(fields: [confirmationId], references: [id])
+  driver                User?                  @relation("DriverBookings", fields: [driverId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user                  User                   @relation(fields: [userId], references: [id])
+  financialTransactions FinancialTransaction[]
+  notifications         Notification[]
+  payment               Payment?
+  quotes                Quote?
+  enhancements          TripEnhancement?
+
+  @@index([userId])
+  @@index([status])
+  @@index([scheduledDateTime])
+  @@index([driverId], map: "idx_bookings_driver_id")
+  @@map("bookings")
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  address   String
+  latitude  Decimal  @db.Decimal(10, 8)
+  longitude Decimal  @db.Decimal(11, 8)
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("locations")
+}
+
+model Payment {
+  id                    String                 @id @default(cuid())
+  bookingId             String                 @unique @map("booking_id")
+  stripePaymentIntentId String?                @unique @map("stripe_payment_intent_id")
+  stripeCustomerId      String?                @map("stripe_customer_id")
+  amount                Decimal                @db.Decimal(10, 2)
+  currency              String                 @default("usd")
+  status                PaymentStatus          @default(PENDING)
+  paymentMethodId       String?                @map("payment_method_id")
+  receiptUrl            String?                @map("receipt_url")
+  failureReason         String?                @map("failure_reason")
+  metadata              Json?
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+  financialTransactions FinancialTransaction[]
+  booking               Booking                @relation(fields: [bookingId], references: [id])
+  receipt               Receipt?
+
+  @@index([status])
+  @@map("payments")
+}
+
+model AdminUser {
+  id                     String                 @id @default(cuid())
+  email                  String                 @unique
+  password               String
+  firstName              String                 @map("first_name")
+  lastName               String                 @map("last_name")
+  role                   AdminRole              @default(CUSTOMER_SERVICE)
+  permissions            Json                   @default("[]")
+  isActive               Boolean                @default(true) @map("is_active")
+  lastLoginAt            DateTime?              @map("last_login_at")
+  loginAttempts          Int                    @default(0) @map("login_attempts")
+  lockedUntil            DateTime?              @map("locked_until")
+  mfaEnabled             Boolean                @default(false) @map("mfa_enabled")
+  mfaSecret              String?                @map("mfa_secret")
+  mfaBackupCodes         Json?                  @map("mfa_backup_codes")
+  passwordResetToken     String?                @unique @map("password_reset_token")
+  passwordResetExpires   DateTime?              @map("password_reset_expires")
+  sessionTimeout         Int                    @default(3600) @map("session_timeout")
+  createdAt              DateTime               @default(now()) @map("created_at")
+  updatedAt              DateTime               @updatedAt @map("updated_at")
+  refreshTokens          AdminRefreshToken[]
+  auditLogs              AuditLog[]
+  contentBlocksCreated   ContentBlock[]         @relation("ContentBlockCreatedBy")
+  contentBlocksPublished ContentBlock[]         @relation("ContentBlockPublishedBy")
+  customReports          CustomReport[]
+  emailTemplates         EmailTemplate[]
+  financialTransactions  FinancialTransaction[]
+  holidays               Holiday[]
+  integrations           Integration[]
+  pricingRules           PricingRule[]
+  serviceAreas           ServiceArea[]
+  smsTemplates           SmsTemplate[]
+  systemConfigurations   SystemConfiguration[]
+
+  @@index([role])
+  @@index([isActive])
+  @@map("admin_users")
+}
+
+model AdminRefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  adminId   String    @map("admin_id")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([expiresAt])
+  @@map("admin_refresh_tokens")
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  adminId    String    @map("admin_id")
+  action     String
+  resource   String
+  resourceId String?   @map("resource_id")
+  details    Json?
+  ipAddress  String?   @map("ip_address")
+  userAgent  String?   @map("user_agent")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  admin      AdminUser @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([resource])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model PaymentMethod {
+  id                    String   @id @default(cuid())
+  userId                String   @map("user_id")
+  stripePaymentMethodId String   @unique @map("stripe_payment_method_id")
+  cardBrand             String?  @map("card_brand")
+  cardLast4             String?  @map("card_last4")
+  cardExpMonth          Int?     @map("card_exp_month")
+  cardExpYear           Int?     @map("card_exp_year")
+  isDefault             Boolean  @default(false) @map("is_default")
+  createdAt             DateTime @default(now()) @map("created_at")
+  user                  User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("payment_methods")
+}
+
+model Receipt {
+  id            String    @id @default(cuid())
+  paymentId     String    @unique @map("payment_id")
+  receiptNumber String    @unique @map("receipt_number")
+  receiptData   Json      @map("receipt_data")
+  emailSent     Boolean   @default(false) @map("email_sent")
+  emailSentAt   DateTime? @map("email_sent_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  payment       Payment   @relation(fields: [paymentId], references: [id])
+
+  @@index([paymentId])
+  @@index([receiptNumber])
+  @@map("receipts")
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  userId          String?     @map("user_id")
+  bookingDraftId  String?     @map("booking_draft_id")
+  serviceType     ServiceType @map("service_type")
+  pickupLocation  Json        @map("pickup_location")
+  dropoffLocation Json?       @map("dropoff_location")
+  pickupDateTime  DateTime    @map("pickup_datetime")
+  returnDateTime  DateTime?   @map("return_datetime")
+  durationHours   Int?        @map("duration_hours")
+  distance        Decimal?    @db.Decimal(10, 2)
+  duration        Int?
+  breakdown       Json
+  totalAmount     Decimal     @map("total_amount") @db.Decimal(10, 2)
+  currency        String      @default("USD")
+  validUntil      DateTime    @map("valid_until")
+  lockedAt        DateTime?   @map("locked_at")
+  bookingId       String?     @unique @map("booking_id")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  booking         Booking?    @relation(fields: [bookingId], references: [id])
+  user            User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId, validUntil])
+  @@index([bookingDraftId])
+  @@map("quotes")
+}
+
+model PricingConfig {
+  id            String    @id @default(cuid())
+  version       String
+  config        Json
+  effectiveDate DateTime  @map("effective_date")
+  expiryDate    DateTime? @map("expiry_date")
+  isActive      Boolean   @default(false) @map("is_active")
+  createdBy     String?   @map("created_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([isActive, effectiveDate])
+  @@map("pricing_configs")
+}
+
+model SurchargeDefinition {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  type          String
+  value         Decimal   @db.Decimal(10, 2)
+  conditions    Json?
+  priority      Int       @default(0)
+  isActive      Boolean   @default(true) @map("is_active")
+  effectiveDate DateTime  @map("effective_date")
+  expiryDate    DateTime? @map("expiry_date")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([isActive, effectiveDate])
+  @@map("surcharge_definitions")
+}
+
+model TripEnhancement {
+  id                   String   @id @default(cuid())
+  bookingId            String   @unique @map("booking_id")
+  tripProtection       Boolean  @default(false) @map("trip_protection")
+  meetAndGreet         Boolean  @default(false) @map("meet_and_greet")
+  luggageAssistance    Json?    @map("luggage_assistance")
+  flightInfo           Json?    @map("flight_info")
+  specialRequests      Json?    @map("special_requests")
+  vehiclePreferences   Json?    @map("vehicle_preferences")
+  childSeatRequests    Json?    @map("child_seat_requests")
+  totalEnhancementCost Decimal  @default(0) @map("total_enhancement_cost") @db.Decimal(10, 2)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  booking              Booking  @relation(fields: [bookingId], references: [id])
+
+  @@map("trip_enhancements")
+}
+
+model VehicleOption {
+  id                  String      @id @default(cuid())
+  type                VehicleType @unique
+  name                String
+  description         String?
+  features            Json?
+  basePriceMultiplier Decimal     @default(1.00) @map("base_price_multiplier") @db.Decimal(3, 2)
+  imageUrl            String?     @map("image_url")
+  isAvailable         Boolean     @default(true) @map("is_available")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("vehicle_options")
+}
+
+model EnhancementOption {
+  id            String              @id @default(cuid())
+  category      EnhancementCategory
+  name          String
+  description   String?
+  cost          Decimal             @db.Decimal(10, 2)
+  isActive      Boolean             @default(true) @map("is_active")
+  configuration Json?
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("enhancement_options")
+}
+
+model BookingModification {
+  id               String    @id @default(cuid())
+  bookingId        String    @map("booking_id")
+  modificationType String    @map("modification_type")
+  originalData     Json      @map("original_data")
+  newData          Json      @map("new_data")
+  priceDifference  Decimal   @default(0) @map("price_difference") @db.Decimal(10, 2)
+  modificationFee  Decimal   @default(0) @map("modification_fee") @db.Decimal(10, 2)
+  modifiedBy       String    @map("modified_by")
+  reason           String?
+  status           String    @default("pending")
+  processedAt      DateTime? @map("processed_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  booking          Booking   @relation(fields: [bookingId], references: [id])
+  user             User      @relation(fields: [modifiedBy], references: [id])
+
+  @@index([bookingId])
+  @@index([status])
+  @@map("booking_modifications")
+}
+
+model Cancellation {
+  id                    String    @id @default(cuid())
+  bookingId             String    @unique @map("booking_id")
+  cancelledBy           String    @map("cancelled_by")
+  cancellationReason    String?   @map("cancellation_reason")
+  cancellationType      String    @map("cancellation_type")
+  refundAmount          Decimal   @default(0) @map("refund_amount") @db.Decimal(10, 2)
+  refundStatus          String    @default("pending") @map("refund_status")
+  refundTransactionId   String?   @map("refund_transaction_id")
+  refundProcessedAt     DateTime? @map("refund_processed_at")
+  tripProtectionApplied Boolean   @default(false) @map("trip_protection_applied")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  booking               Booking[]
+  user                  User      @relation(fields: [cancelledBy], references: [id])
+
+  @@index([refundStatus])
+  @@map("cancellations")
+}
+
+model Notification {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  bookingId    String?   @map("booking_id")
+  type         String
+  channel      String
+  templateId   String?   @map("template_id")
+  recipient    String
+  subject      String?
+  content      String
+  metadata     Json?
+  status       String    @default("pending")
+  sentAt       DateTime? @map("sent_at")
+  deliveredAt  DateTime? @map("delivered_at")
+  failedAt     DateTime? @map("failed_at")
+  errorMessage String?   @map("error_message")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  booking      Booking?  @relation(fields: [bookingId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([bookingId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model OAuthProvider {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  provider     String
+  providerId   String   @map("provider_id")
+  accessToken  String?  @map("access_token")
+  refreshToken String?  @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([userId])
+  @@map("oauth_providers")
+}
+
+model NotificationPreferences {
+  id                String    @id @default(cuid())
+  userId            String    @unique @map("user_id")
+  emailEnabled      Boolean   @default(true) @map("email_enabled")
+  smsEnabled        Boolean   @default(true) @map("sms_enabled")
+  pushEnabled       Boolean   @default(true) @map("push_enabled")
+  marketingEmails   Boolean   @default(false) @map("marketing_emails")
+  reminderFrequency String    @default("normal") @map("reminder_frequency")
+  quietHoursStart   DateTime? @map("quiet_hours_start") @db.Time(6)
+  quietHoursEnd     DateTime? @map("quiet_hours_end") @db.Time(6)
+  language          String    @default("en")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  user              User      @relation(fields: [userId], references: [id])
+
+  @@map("notification_preferences")
+}
+
+model BookingConfirmation {
+  id                   String    @id @default(cuid())
+  bookingId            String    @unique @map("booking_id")
+  bookingReference     String    @unique @map("booking_reference")
+  confirmationNumber   String    @map("confirmation_number")
+  status               String    @default("confirmed")
+  confirmationSentAt   DateTime? @map("confirmation_sent_at")
+  modificationDeadline DateTime  @map("modification_deadline")
+  calendarInviteSent   Boolean   @default(false) @map("calendar_invite_sent")
+  pdfReceiptUrl        String?   @map("pdf_receipt_url")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  bookings             Booking[]
+
+  @@index([bookingId])
+  @@map("booking_confirmations")
+}
+
+model SavedLocation {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  name         String
+  address      String
+  latitude     Decimal? @db.Decimal(10, 8)
+  longitude    Decimal? @db.Decimal(11, 8)
+  locationType String?  @map("location_type")
+  isDefault    Boolean  @default(false) @map("is_default")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("saved_locations")
+}
+
+model NotificationTemplate {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      String
+  channel   String
+  subject   String?
+  content   String
+  variables Json?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("notification_templates")
+}
+
+model DashboardMetrics {
+  id                  String   @id @default(cuid())
+  date                DateTime @unique @db.Date
+  activeBookings      Int      @default(0) @map("active_bookings")
+  totalBookings       Int      @default(0) @map("total_bookings")
+  completedBookings   Int      @default(0) @map("completed_bookings")
+  cancelledBookings   Int      @default(0) @map("cancelled_bookings")
+  totalRevenue        Decimal  @default(0) @map("total_revenue") @db.Decimal(10, 2)
+  averageBookingValue Decimal  @default(0) @map("average_booking_value") @db.Decimal(10, 2)
+  newCustomers        Int      @default(0) @map("new_customers")
+  returningCustomers  Int      @default(0) @map("returning_customers")
+  peakHour            Int?     @map("peak_hour")
+  popularServiceType  String?  @map("popular_service_type")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([date])
+  @@map("dashboard_metrics")
+}
+
+model SystemConfiguration {
+  id            String    @id @default(cuid())
+  category      String
+  key           String
+  value         Json
+  description   String?
+  isActive      Boolean   @default(true) @map("is_active")
+  version       Int       @default(1)
+  effectiveDate DateTime  @default(now()) @map("effective_date")
+  createdById   String    @map("created_by_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdBy     AdminUser @relation(fields: [createdById], references: [id])
+
+  @@unique([category, key, version])
+  @@map("system_configurations")
+}
+
+model EmailTemplate {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String
+  category    String
+  subject     String
+  htmlContent String    @map("html_content")
+  textContent String?   @map("text_content")
+  variables   Json      @default("[]")
+  isActive    Boolean   @default(true) @map("is_active")
+  version     Int       @default(1)
+  lastUsedAt  DateTime? @map("last_used_at")
+  createdById String    @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdBy   AdminUser @relation(fields: [createdById], references: [id])
+
+  @@unique([slug, version])
+  @@map("email_templates")
+}
+
+model SmsTemplate {
+  id             String    @id @default(cuid())
+  name           String
+  slug           String
+  category       String
+  content        String
+  variables      Json      @default("[]")
+  characterCount Int       @map("character_count")
+  isActive       Boolean   @default(true) @map("is_active")
+  version        Int       @default(1)
+  lastUsedAt     DateTime? @map("last_used_at")
+  createdById    String    @map("created_by_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  createdBy      AdminUser @relation(fields: [createdById], references: [id])
+
+  @@unique([slug, version])
+  @@map("sms_templates")
+}
+
+model FinancialTransaction {
+  id             String     @id @default(cuid())
+  type           String
+  category       String
+  amount         Decimal    @db.Decimal(10, 2)
+  currency       String     @default("USD")
+  status         String
+  bookingId      String?    @map("booking_id")
+  paymentId      String?    @map("payment_id")
+  refundId       String?    @map("refund_id")
+  stripeId       String?    @map("stripe_id")
+  description    String?
+  metadata       Json       @default("{}")
+  reconciled     Boolean    @default(false)
+  reconciledAt   DateTime?  @map("reconciled_at")
+  reconciledById String?    @map("reconciled_by_id")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  booking        Booking?   @relation(fields: [bookingId], references: [id])
+  payment        Payment?   @relation(fields: [paymentId], references: [id])
+  reconciledBy   AdminUser? @relation(fields: [reconciledById], references: [id])
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([reconciled])
+  @@map("financial_transactions")
+}
+
+model PricingRule {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  ruleType      String
+  serviceType   String
+  conditions    Json      @default("{}")
+  calculation   Json
+  priority      Int       @default(0)
+  isActive      Boolean   @default(true) @map("is_active")
+  effectiveFrom DateTime  @map("effective_from")
+  effectiveTo   DateTime? @map("effective_to")
+  createdById   String    @map("created_by_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdBy     AdminUser @relation(fields: [createdById], references: [id])
+
+  @@map("pricing_rules")
+}
+
+model BusinessHours {
+  id        String   @id @default(cuid())
+  dayOfWeek Int      @unique @map("day_of_week")
+  openTime  String   @map("open_time")
+  closeTime String   @map("close_time")
+  isClosed  Boolean  @default(false) @map("is_closed")
+  timezone  String   @default("America/Los_Angeles")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("business_hours")
+}
+
+model Holiday {
+  id                  String    @id @default(cuid())
+  name                String
+  date                DateTime  @unique @db.Date
+  isClosed            Boolean   @default(true) @map("is_closed")
+  openTime            String?   @map("open_time")
+  closeTime           String?   @map("close_time")
+  surchargePercentage Decimal?  @map("surcharge_percentage") @db.Decimal(5, 2)
+  createdById         String    @map("created_by_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  createdBy           AdminUser @relation(fields: [createdById], references: [id])
+
+  @@map("holidays")
+}
+
+model ServiceArea {
+  id                  String    @id @default(cuid())
+  name                String
+  description         String?
+  polygon             Json
+  center              Json
+  radius              Decimal?  @db.Decimal(10, 2)
+  surchargeAmount     Decimal?  @map("surcharge_amount") @db.Decimal(10, 2)
+  surchargePercentage Decimal?  @map("surcharge_percentage") @db.Decimal(5, 2)
+  isActive            Boolean   @default(true) @map("is_active")
+  restrictions        Json      @default("{}")
+  createdById         String    @map("created_by_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  createdBy           AdminUser @relation(fields: [createdById], references: [id])
+
+  @@index([isActive])
+  @@map("service_areas")
+}
+
+model CustomReport {
+  id               String            @id @default(cuid())
+  name             String
+  description      String?
+  reportType       String            @map("report_type")
+  configuration    Json
+  schedule         Json?
+  lastRunAt        DateTime?         @map("last_run_at")
+  nextRunAt        DateTime?         @map("next_run_at")
+  recipients       String[]
+  format           String[]          @default(["pdf", "excel"])
+  isActive         Boolean           @default(true) @map("is_active")
+  createdById      String            @map("created_by_id")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  createdBy        AdminUser         @relation(fields: [createdById], references: [id])
+  reportExecutions ReportExecution[]
+
+  @@index([isActive])
+  @@map("custom_reports")
+}
+
+model ReportExecution {
+  id          String       @id @default(cuid())
+  reportId    String       @map("report_id")
+  status      String
+  startedAt   DateTime     @map("started_at")
+  completedAt DateTime?    @map("completed_at")
+  fileUrl     String?      @map("file_url")
+  error       String?
+  metadata    Json         @default("{}")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  report      CustomReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@map("report_executions")
+}
+
+model ContentBlock {
+  id            String     @id @default(cuid())
+  key           String
+  title         String
+  content       String
+  contentType   String     @map("content_type")
+  category      String
+  language      String     @default("en")
+  version       Int        @default(1)
+  isPublished   Boolean    @default(false) @map("is_published")
+  publishedAt   DateTime?  @map("published_at")
+  publishedById String?    @map("published_by_id")
+  createdById   String     @map("created_by_id")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  createdBy     AdminUser  @relation("ContentBlockCreatedBy", fields: [createdById], references: [id])
+  publishedBy   AdminUser? @relation("ContentBlockPublishedBy", fields: [publishedById], references: [id])
+
+  @@unique([key, language, version])
+  @@map("content_blocks")
+}
+
+model Integration {
+  id           String    @id @default(cuid())
+  name         String
+  provider     String
+  config       Json
+  isActive     Boolean   @default(true) @map("is_active")
+  environment  String    @default("sandbox")
+  lastTestedAt DateTime? @map("last_tested_at")
+  createdById  String    @map("created_by_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  createdBy    AdminUser @relation(fields: [createdById], references: [id])
+
+  @@index([provider])
+  @@index([isActive])
+  @@map("integrations")
+}
+
+enum ServiceType {
+  ONE_WAY
+  ROUNDTRIP
+  HOURLY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  OPERATIONS_MANAGER
+  FINANCE_MANAGER
+  CUSTOMER_SERVICE
+}
+
+enum VehicleType {
+  STANDARD
+  LUXURY_SEDAN
+  SUV
+  EXECUTIVE
+  ECO_FRIENDLY
+}
+
+enum EnhancementCategory {
+  PROTECTION
+  LUGGAGE
+  VEHICLE
+  CHILD_SAFETY
+  SPECIAL_REQUEST
+}
+
+enum DriverStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_APPROVAL
+}

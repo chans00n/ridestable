@@ -1,0 +1,88 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-pr-size:
+    name: Check PR Size
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check PR size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const { additions, deletions, changed_files } = pr;
+            
+            const totalChanges = additions + deletions;
+            const maxChanges = 1000;
+            const maxFiles = 30;
+            
+            if (totalChanges > maxChanges) {
+              core.warning(`This PR contains ${totalChanges} changes. Consider breaking it into smaller PRs for easier review.`);
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `⚠️ **Large PR Alert**\n\nThis PR contains ${totalChanges} total changes across ${changed_files} files. Consider breaking it into smaller, more focused PRs for easier review and testing.`
+              });
+            }
+            
+            if (changed_files > maxFiles) {
+              core.warning(`This PR changes ${changed_files} files. Consider breaking it into smaller PRs.`);
+            }
+
+  check-branch-naming:
+    name: Check Branch Naming
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check branch name
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = context.payload.pull_request.head.ref;
+            const validPrefixes = ['feature/', 'fix/', 'hotfix/', 'release/', 'chore/', 'docs/', 'test/', 'refactor/'];
+            
+            const isValid = validPrefixes.some(prefix => branchName.startsWith(prefix));
+            
+            if (!isValid) {
+              core.setFailed(`Branch name "${branchName}" doesn't follow naming convention. Use prefixes: ${validPrefixes.join(', ')}`);
+            }
+
+  label-pr:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    
+    steps:
+      - name: Label PR based on files changed
+        uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: .github/labeler.yml
+
+  check-todos:
+    name: Check for TODOs
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for TODO comments
+        run: |
+          # Find TODO comments
+          TODO_COUNT=$(grep -r "TODO\|FIXME\|HACK" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . | wc -l || true)
+          
+          if [ $TODO_COUNT -gt 0 ]; then
+            echo "Found $TODO_COUNT TODO/FIXME/HACK comments in the code:"
+            grep -rn "TODO\|FIXME\|HACK" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . || true
+            echo "::warning::Found $TODO_COUNT TODO comments. Please address them or create issues for tracking."
+          fi

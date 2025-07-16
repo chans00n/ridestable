@@ -1,0 +1,80 @@
+# Add 'frontend' label to any change within the 'frontend' folder
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: frontend/**/*
+
+# Add 'backend' label to any change within the 'backend' folder
+backend:
+  - changed-files:
+    - any-glob-to-any-file: backend/**/*
+
+# Add 'shared' label to any change within the 'shared' folder
+shared:
+  - changed-files:
+    - any-glob-to-any-file: shared/**/*
+
+# Add 'documentation' label to any markdown file changes
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - "**/*.md"
+      - docs/**/*
+
+# Add 'dependencies' label to package.json changes
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/package.json"
+      - "**/package-lock.json"
+      - "**/yarn.lock"
+
+# Add 'database' label to any Prisma schema changes
+database:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/prisma/**/*"
+      - "**/*.sql"
+
+# Add 'ci/cd' label to any GitHub Actions changes
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file: .github/**/*
+
+# Add 'authentication' label to auth-related files
+authentication:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/auth/**/*"
+      - "**/login/**/*"
+      - "**/register/**/*"
+
+# Add 'payment' label to payment-related files
+payment:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/payment/**/*"
+      - "**/stripe/**/*"
+
+# Add 'booking' label to booking-related files
+booking:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/booking/**/*"
+      - "**/quote/**/*"
+
+# Add 'ui' label to component changes
+ui:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/components/**/*"
+      - "**/*.css"
+      - "**/*.scss"
+
+# Add 'testing' label to test file changes
+testing:
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/*.test.*"
+      - "**/*.spec.*"
+      - "**/tests/**/*"
+      - "**/__tests__/**/*"
