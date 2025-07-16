@@ -8,8 +8,14 @@ import passport from './config/passport'
 import { config } from './config'
 import { errorHandler } from './middleware/error'
 import routes from './routes'
+import { logger } from './config/logger'
 
 const app = express()
+
+// Log startup in Vercel
+if (process.env.VERCEL) {
+  logger.info('App starting in Vercel serverless environment')
+}
 
 // Trust proxy headers when deployed to Vercel
 // Use specific number of proxies for security

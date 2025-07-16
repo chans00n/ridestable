@@ -20,7 +20,10 @@ export class PricingEngineService {
 
   constructor() {
     this.config = DEFAULT_PRICING_CONFIG;
-    this.loadConfigFromDatabase();
+    // Skip database load in serverless environment
+    if (!process.env.VERCEL) {
+      this.loadConfigFromDatabase();
+    }
   }
 
   private async loadConfigFromDatabase() {

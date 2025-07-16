@@ -63,6 +63,12 @@ prisma.$on('error', (e) => {
 
 export const connectDatabase = async () => {
   try {
+    // Skip connection in Vercel - Prisma will connect on first query
+    if (process.env.VERCEL) {
+      logger.info('Database connection skipped (Vercel serverless)')
+      return
+    }
+    
     // Test connection on startup in production
     if (process.env.NODE_ENV === 'production') {
       await prisma.$connect()
@@ -77,10 +83,7 @@ export const connectDatabase = async () => {
     }
   } catch (error) {
     logger.error('Failed to connect to database:', error)
-    // Don't exit process in serverless environment
-    if (!process.env.VERCEL) {
-      process.exit(1)
-    }
+    process.exit(1)
   }
 }
 
