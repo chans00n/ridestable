@@ -66,6 +66,20 @@ router.get('/health', (_req, res) => {
   })
 })
 
+// Test endpoint for debugging
+router.get('/test', (_req, res) => {
+  res.json({
+    message: 'API is working',
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL: !!process.env.VERCEL,
+      DATABASE_URL: !!process.env.DATABASE_URL,
+      DIRECT_URL: !!process.env.DIRECT_URL,
+    },
+    timestamp: new Date().toISOString(),
+  })
+})
+
 // Detailed health check (with dependencies)
 router.get('/health/detailed', async (_req, res) => {
   try {

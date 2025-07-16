@@ -2,13 +2,15 @@ export function addConnectionParams(url: string): string {
   // Parse the URL
   const urlObj = new URL(url)
   
-  // Add connection parameters for Supabase
-  urlObj.searchParams.set('connection_limit', '1')
-  urlObj.searchParams.set('pool_timeout', '0')
+  // Add connection parameters for Supabase in serverless
+  // Don't override existing parameters
+  if (!urlObj.searchParams.has('connection_limit')) {
+    urlObj.searchParams.set('connection_limit', '1')
+  }
   
-  // Keep pgbouncer if it exists
-  if (!urlObj.searchParams.has('pgbouncer')) {
-    urlObj.searchParams.set('pgbouncer', 'true')
+  // Add connect timeout for serverless
+  if (!urlObj.searchParams.has('connect_timeout')) {
+    urlObj.searchParams.set('connect_timeout', '10')
   }
   
   return urlObj.toString()

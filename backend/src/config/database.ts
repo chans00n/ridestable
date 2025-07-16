@@ -13,6 +13,7 @@ let DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:password@1
 // Add connection parameters for serverless environment
 if (process.env.VERCEL && process.env.DATABASE_URL) {
   DATABASE_URL = addConnectionParams(DATABASE_URL)
+  logger.info('Using modified DATABASE_URL with connection params')
 }
 
 // Log database configuration for debugging

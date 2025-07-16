@@ -12,8 +12,9 @@ import routes from './routes'
 const app = express()
 
 // Trust proxy headers when deployed to Vercel
+// Use specific number of proxies for security
 if (process.env.VERCEL) {
-  app.set('trust proxy', true)
+  app.set('trust proxy', 1)
 }
 
 app.use(helmet())
@@ -60,6 +61,12 @@ const limiter = rateLimit({
   windowMs: config.rateLimit.windowMs,
   max: config.rateLimit.maxRequests,
   message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Skip rate limiting in development
+  skip: () => config.env === 'development',
+  // Disable validation warnings in production
+  validate: config.env === 'production' ? false : undefined,
 })
 
 // When deployed to Vercel, the app is already mounted at /api
