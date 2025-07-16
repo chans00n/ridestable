@@ -39,7 +39,8 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 // Raw body parsing for Stripe webhooks - must come before express.json()
-app.use('/api/payments/webhook', express.raw({ type: 'application/json' }))
+const webhookPath = process.env.VERCEL ? '/payments/webhook' : '/api/payments/webhook'
+app.use(webhookPath, express.raw({ type: 'application/json' }))
 
 // JSON parsing for all other routes
 app.use(express.json())
@@ -56,8 +57,10 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 })
 
-app.use('/api', limiter)
-app.use('/api', routes)
+// When deployed to Vercel, the app is already mounted at /api
+const routePrefix = process.env.VERCEL ? '' : '/api'
+app.use(routePrefix, limiter)
+app.use(routePrefix, routes)
 
 app.use(errorHandler)
 
