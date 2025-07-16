@@ -198,6 +198,39 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode, onModeChan
               )}
             </div>
 
+            {mode === 'signup' && (
+              <>
+                <div>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    {...registerForm.register('confirmPassword')}
+                  />
+                  {registerForm.formState.errors.confirmPassword && (
+                    <p className="text-sm text-destructive mt-1">{registerForm.formState.errors.confirmPassword.message}</p>
+                  )}
+                </div>
+
+                <div className="flex items-start space-x-2">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-primary mt-1"
+                    {...registerForm.register('termsAccepted')}
+                  />
+                  <Label htmlFor="terms" className="text-sm font-normal">
+                    I agree to the <a href="#" className="text-primary underline">Terms of Service</a> and{' '}
+                    <a href="#" className="text-primary underline">Privacy Policy</a>
+                  </Label>
+                </div>
+                {registerForm.formState.errors.termsAccepted && (
+                  <p className="text-sm text-destructive">{registerForm.formState.errors.termsAccepted.message}</p>
+                )}
+              </>
+            )}
+
             {mode === 'login' && (
               <div className="flex items-center space-x-2">
                 <input
