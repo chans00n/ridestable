@@ -29,12 +29,12 @@
     "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0",
     "paths": {
-      "@stable-ride/shared": ["../shared/src"],
-      "@stable-ride/shared/*": ["../shared/src/*"]
+      "@stable-ride/shared": ["./src/shared"],
+      "@stable-ride/shared/*": ["./src/shared/*"]
     },
     "baseUrl": "."
   },
-  "include": ["src/**/*", "../shared/src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
   "ts-node": {
     "transpileOnly": true,

@@ -53,43 +53,6 @@ export * from './interfaces';
 
 fs.writeFileSync(path.join(sharedDestPath, 'index.ts'), indexContent);
 
-// Now update all imports in the backend to use the local shared directory
-console.log('Updating imports in backend files...');
-
-function updateImports(dir) {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    
-    if (entry.isDirectory() && entry.name !== 'shared' && entry.name !== 'node_modules') {
-      updateImports(fullPath);
-    } else if (entry.isFile() && entry.name.endsWith('.ts')) {
-      let content = fs.readFileSync(fullPath, 'utf8');
-      const originalContent = content;
-      
-      // Replace @stable-ride/shared imports with relative imports to ./shared
-      content = content.replace(
-        /from ['"]@stable-ride\/shared['"]/g,
-        "from '../shared'"
-      );
-      
-      // Handle deeper nested files
-      if (fullPath.includes('/routes/') || fullPath.includes('/services/') || fullPath.includes('/middleware/')) {
-        content = content.replace(
-          /from ['"]\.\.\/shared['"]/g,
-          "from '../../shared'"
-        );
-      }
-      
-      if (content !== originalContent) {
-        fs.writeFileSync(fullPath, content);
-        console.log(`Updated imports in: ${path.relative(backendSrcPath, fullPath)}`);
-      }
-    }
-  }
-}
-
-updateImports(backendSrcPath);
+// No need to update imports - TypeScript path mapping will handle it
 
 console.log('Shared types bundled successfully!');
