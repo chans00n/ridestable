@@ -7,8 +7,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/badge'
 import { showToast } from '@/components/ui/Toast'
 import { Send, RefreshCw, Smartphone } from 'lucide-react'

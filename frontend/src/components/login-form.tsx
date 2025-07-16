@@ -3,16 +3,16 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoginSchema, type LoginDto } from '@stable-ride/shared'
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/Button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from '@/components/ui/card'
 import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/label"
+import { Label } from '@/components/ui/label'
 import { Link } from 'react-router-dom'
 import { Loader2 } from "lucide-react"
 import { useAuth } from '@/contexts/AuthContext'

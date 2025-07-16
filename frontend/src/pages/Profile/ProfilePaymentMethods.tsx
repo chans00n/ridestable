@@ -10,7 +10,7 @@ import { api } from '../../services/api';
 import { showToast } from '../../components/ui/Toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,

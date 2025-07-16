@@ -4,7 +4,7 @@ import { usePayment } from '../../hooks/usePayment';
 import { toast } from 'react-hot-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 interface PaymentDetails {
   paymentId: string;

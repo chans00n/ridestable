@@ -21,7 +21,7 @@ import { Pagination } from '../components/ui/Pagination';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardTable } from '../components/DashboardTable';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { LocationModal } from '../components/ui/LocationModal';
 import { RouteModal } from '../components/ui/RouteModal';
 import { BookingDetailsModal } from '../components/ui/BookingDetailsModal';

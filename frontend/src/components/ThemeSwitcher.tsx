@@ -1,7 +1,7 @@
 import React from 'react';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../contexts/ThemeContext';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 export const ThemeSwitcher: React.FC = () => {
   const { theme, toggleTheme } = useTheme();

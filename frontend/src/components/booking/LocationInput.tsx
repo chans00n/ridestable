@@ -3,8 +3,8 @@ import { getGoogleMapsLoader } from '../../services/googleMapsLoader';
 import type { BookingLocation } from '../../types/booking-types';
 import { showToast } from '../ui/Toast';
 import { api } from '../../services/api';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 
 interface LocationInputProps {
