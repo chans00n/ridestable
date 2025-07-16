@@ -58,3 +58,6 @@ prisma/migrations/dev/
 
 # Driver app (separate repo)
 stable-ride-driver/
+
+# Bundled shared types (generated during build)
+backend/src/shared/

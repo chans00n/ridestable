@@ -3,8 +3,8 @@
 
 echo "Running Vercel build script..."
 
-# Copy shared package for Vercel
-node scripts/copy-shared.js
+# Bundle shared types into backend
+node scripts/bundle-shared.js
 
 # Run the main build
 node build-vercel.js
