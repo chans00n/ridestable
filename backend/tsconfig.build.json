@@ -29,8 +29,8 @@
     "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0",
     "paths": {
-      "@stable-ride/shared": ["./src/shared"],
-      "@stable-ride/shared/*": ["./src/shared/*"]
+      "@stable-ride/shared": ["./src/shared-types"],
+      "@stable-ride/shared/*": ["./src/shared-types"]
     },
     "baseUrl": "."
   },
