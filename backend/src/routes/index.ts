@@ -1,4 +1,6 @@
 import { Router } from 'express'
+import { prisma } from '../config/database'
+import { cache } from '../utils/cache'
 import authRoutes from './auth.routes'
 import oauthRoutes from './oauth.routes'
 import locationRoutes from './location.routes'
@@ -54,8 +56,53 @@ router.use('/admin/sms-templates', adminSmsTemplateRoutes)
 router.use('/admin/policies', adminPolicyRoutes)
 router.use('/admin', adminRoutes) // This should be last as it applies auth middleware
 
+// Basic health check (no dependencies)
 router.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    vercel: !!process.env.VERCEL
+  })
+})
+
+// Detailed health check (with dependencies)
+router.get('/health/detailed', async (_req, res) => {
+  try {
+    const checks = {
+      api: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: 'checking',
+      cache: 'checking'
+    }
+    
+    // Check database
+    try {
+      await prisma.$queryRaw`SELECT 1`
+      checks.database = 'ok'
+    } catch (error) {
+      checks.database = 'error'
+    }
+    
+    // Check cache
+    try {
+      await cache.setEx('health-check', 10, 'ok')
+      const value = await cache.get('health-check')
+      checks.cache = value === 'ok' ? 'ok' : 'error'
+    } catch (error) {
+      checks.cache = 'error'
+    }
+    
+    const allOk = Object.values(checks).every(v => v === 'ok' || typeof v === 'string')
+    res.status(allOk ? 200 : 503).json(checks)
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Health check failed',
+      timestamp: new Date().toISOString()
+    })
+  }
 })
 
 export default router

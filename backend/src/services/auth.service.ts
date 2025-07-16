@@ -1,5 +1,5 @@
 import { prisma } from '../config/database'
-import { redisClient } from '../config/redis'
+import { cache } from '../utils/cache'
 import { hashPassword, comparePassword } from '../utils/password'
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt'
 import { generateSecureToken, generateTokenExpiry } from '../utils/token'
@@ -101,7 +101,7 @@ export class AuthService {
       },
     })
 
-    await redisClient.setEx(`session:${user.id}`, 3600, JSON.stringify({ userId: user.id }))
+    await cache.setEx(`session:${user.id}`, 3600, JSON.stringify({ userId: user.id }))
 
     return {
       user: this.toUserDto(user),
@@ -190,7 +190,7 @@ export class AuthService {
     })
 
     const sessionDuration = rememberMe ? 86400 : 3600 // 24 hours if remember me, else 1 hour
-    await redisClient.setEx(`session:${user.id}`, sessionDuration, JSON.stringify({ userId: user.id }))
+    await cache.setEx(`session:${user.id}`, sessionDuration, JSON.stringify({ userId: user.id }))
 
     logger.info(`User ${user.email} logged in successfully`)
 
@@ -270,7 +270,7 @@ export class AuthService {
 
     // Check rate limiting for password resets
     const resetKey = `password-reset:${user.id}`
-    const resetCount = await redisClient.get(resetKey)
+    const resetCount = await cache.get(resetKey)
     
     if (resetCount && parseInt(resetCount) >= 3) {
       throw new AppError(429, 'Too many password reset requests. Try again later')
@@ -290,9 +290,9 @@ export class AuthService {
     // Increment rate limit counter
     const ttl = 3600 // 1 hour
     if (resetCount) {
-      await redisClient.setEx(resetKey, ttl, (parseInt(resetCount) + 1).toString())
+      await cache.setEx(resetKey, ttl, (parseInt(resetCount) + 1).toString())
     } else {
-      await redisClient.setEx(resetKey, ttl, '1')
+      await cache.setEx(resetKey, ttl, '1')
     }
 
     await EmailService.sendPasswordResetEmail(user.email, resetToken)
@@ -332,7 +332,7 @@ export class AuthService {
     })
 
     // Clear session
-    await redisClient.del(`session:${user.id}`)
+    await cache.del(`session:${user.id}`)
 
     logger.info(`Password reset for user ${user.email}`)
   }
@@ -394,7 +394,7 @@ export class AuthService {
       })
     }
 
-    await redisClient.del(`session:${userId}`)
+    await cache.del(`session:${userId}`)
 
     logger.info(`User ${userId} logged out`)
   }

@@ -3,7 +3,7 @@ import { AppError } from '../utils/errors';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, format } from 'date-fns';
 // import { notificationService } from './notification.service';
 import { sendBookingNotification } from './notification-patch';
-import { redisClient } from '../config/redis';
+import { cache } from '../utils/cache';
 
 const prisma = new PrismaClient();
 
@@ -272,7 +272,7 @@ class DriverService {
       timestamp: new Date().toISOString(),
     };
 
-    await redisClient.setex(key, 300, JSON.stringify(locationData)); // Expire after 5 minutes
+    await cache.setEx(key, 300, JSON.stringify(locationData)); // Expire after 5 minutes
   }
 
   async startLocationSharing(rideId: string, driverId: string) {
@@ -290,12 +290,12 @@ class DriverService {
 
     // Set location sharing flag in Redis
     const key = `location:sharing:${rideId}`;
-    await redisClient.setex(key, 14400, 'true'); // Expire after 4 hours
+    await cache.setEx(key, 14400, 'true'); // Expire after 4 hours
   }
 
   async stopLocationSharing(rideId: string, driverId: string) {
     const key = `location:sharing:${rideId}`;
-    await redisClient.del(key);
+    await cache.del(key);
   }
 
   async getDriverProfile(driverId: string) {

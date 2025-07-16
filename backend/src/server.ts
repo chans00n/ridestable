@@ -10,8 +10,10 @@ const startServer = async () => {
     await connectDatabase()
     await connectRedis()
 
-    // Start scheduled tasks (cron jobs)
-    scheduledTasksService.start()
+    // Skip scheduled tasks in serverless environment
+    if (!process.env.VERCEL) {
+      scheduledTasksService.start()
+    }
 
     const server = app.listen(config.port, '0.0.0.0', () => {
       logger.info(`Server running on port ${config.port}`)

@@ -16,10 +16,20 @@ redisClient.on('connect', () => {
 
 export const connectRedis = async () => {
   try {
+    // Skip Redis connection in serverless environment
+    if (process.env.VERCEL || process.env.SKIP_REDIS === 'true') {
+      logger.info('Skipping Redis connection in serverless environment')
+      return
+    }
     await redisClient.connect()
   } catch (error) {
     logger.error('Failed to connect to Redis:', error)
-    process.exit(1)
+    // Don't exit in production, just log the error
+    if (config.env === 'production') {
+      logger.warn('Running without Redis cache')
+    } else {
+      process.exit(1)
+    }
   }
 }
 
