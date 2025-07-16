@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Testing
+coverage/
+.nyc_output/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__/
+__mocks__/
+
+# Development files
+.env
+.env.local
+.env.development
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Source control
+.git/
+.gitignore
+
+# Build tools config (kept for transparency)
+# These are actually needed for Vercel to build properly
+# tsconfig.json
+# vite.config.ts
+# postcss.config.js
+# tailwind.config.js
