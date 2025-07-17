@@ -12,9 +12,16 @@
     },
     "api/express-vercel.js": {
       "maxDuration": 30
+    },
+    "api/db-test.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
+    {
+      "source": "/db-test",
+      "destination": "/api/db-test"
+    },
     {
       "source": "/js-test/(.*)",
       "destination": "/api/express-vercel"
