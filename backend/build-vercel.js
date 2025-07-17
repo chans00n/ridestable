@@ -55,22 +55,6 @@ try {
   }
 }
 
-// Compile API functions for Vercel
-console.log('Compiling API functions...');
-try {
-  const apiDir = path.join(__dirname, 'api');
-  const apiFiles = fs.readdirSync(apiDir).filter(f => f.endsWith('.ts'));
-  
-  for (const file of apiFiles) {
-    const tsFile = path.join(apiDir, file);
-    const jsFile = tsFile.replace('.ts', '.js');
-    console.log(`Compiling ${file}...`);
-    execSync(`npx esbuild ${tsFile} --outfile=${jsFile} --platform=node --target=node18 --format=cjs`, { stdio: 'inherit' });
-  }
-  console.log('API functions compiled successfully!');
-} catch (error) {
-  console.error('Failed to compile API functions:', error.message);
-  process.exit(1);
-}
+// Note: Vercel will handle TypeScript compilation for API functions
 
 console.log('Build process completed!');
