@@ -21,6 +21,9 @@
     },
     "api/dns-test.ts": {
       "maxDuration": 30
+    },
+    "api/register-test.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -35,6 +38,10 @@
     {
       "source": "/dns-test",
       "destination": "/api/dns-test"
+    },
+    {
+      "source": "/register-test",
+      "destination": "/api/register-test"
     },
     {
       "source": "/js-test/(.*)",
