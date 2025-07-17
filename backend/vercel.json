@@ -24,6 +24,9 @@
     },
     "api/webhook-test.ts": {
       "maxDuration": 30
+    },
+    "api/email-test.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -50,6 +53,10 @@
     {
       "source": "/webhook-test",
       "destination": "/api/webhook-test"
+    },
+    {
+      "source": "/email-test",
+      "destination": "/api/email-test"
     },
     {
       "source": "/(.*)",
