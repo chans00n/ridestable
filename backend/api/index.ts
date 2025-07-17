@@ -1,6 +1,10 @@
-// Import the Express app directly
-// This file will be compiled by Vercel
-import app from '../src/app'
+// Main entry point for Vercel serverless function
+// Import and re-export the Express app handler
 
-// Export for Vercel
-export default app
+import handler from './app'
+
+// Export default for Vercel
+export default handler
+
+// Also export as module.exports for compatibility
+module.exports = handler

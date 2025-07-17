@@ -30,6 +30,6 @@
       "@stable-ride/shared/*": ["./src/shared-types"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "api/**/*"],
   "exclude": ["node_modules", "dist"]
 }
