@@ -18,6 +18,9 @@
     },
     "api/connection-test.ts": {
       "maxDuration": 30
+    },
+    "api/dns-test.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -28,6 +31,10 @@
     {
       "source": "/connection-test",
       "destination": "/api/connection-test"
+    },
+    {
+      "source": "/dns-test",
+      "destination": "/api/dns-test"
     },
     {
       "source": "/js-test/(.*)",
