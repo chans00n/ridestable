@@ -28,6 +28,7 @@ export class PaymentService {
   }> {
     try {
       // Use a transaction to prevent race conditions
+      // Increase timeout to 30 seconds to accommodate Stripe API calls
       return await prisma.$transaction(async (tx) => {
         // Validate booking exists and belongs to user
         const booking = await tx.booking.findFirst({
@@ -143,6 +144,9 @@ export class PaymentService {
           payment,
           clientSecret: paymentIntent.client_secret
         };
+      }, {
+        maxWait: 30000, // Maximum time to wait for a transaction to start (30 seconds)
+        timeout: 30000  // Maximum time for the transaction to complete (30 seconds)
       });
     } catch (error) {
       if (error instanceof AppError) throw error;
