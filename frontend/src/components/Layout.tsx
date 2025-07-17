@@ -24,9 +24,21 @@ export const Layout: React.FC = () => {
                 <Link to="/" className="flex items-center">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="text-2xl font-bold text-primary"
+                    className="flex items-center"
                   >
-                    Stable Ride
+                    <img 
+                      src="/logo_black.png" 
+                      alt="Stable Ride" 
+                      className="h-10 w-10 dark:hidden"
+                    />
+                    <img 
+                      src="/logo_white.png" 
+                      alt="Stable Ride" 
+                      className="h-10 w-10 hidden dark:block"
+                    />
+                    <span className="ml-2 text-2xl font-bold text-primary">
+                      Stable Ride
+                    </span>
                   </motion.div>
                 </Link>
                 {user && (

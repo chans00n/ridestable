@@ -59,6 +59,18 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo_black.png" 
+              alt="Stable Ride" 
+              className="h-16 w-16 dark:hidden"
+            />
+            <img 
+              src="/logo_white.png" 
+              alt="Stable Ride" 
+              className="h-16 w-16 hidden dark:block"
+            />
+          </div>
           <h1 className="text-3xl font-bold text-foreground">Stable Ride</h1>
           <p className="mt-2 text-sm text-muted-foreground">Admin Portal</p>
         </div>
