@@ -15,12 +15,19 @@
     },
     "api/db-test.ts": {
       "maxDuration": 30
+    },
+    "api/connection-test.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
     {
       "source": "/db-test",
       "destination": "/api/db-test"
+    },
+    {
+      "source": "/connection-test",
+      "destination": "/api/connection-test"
     },
     {
       "source": "/js-test/(.*)",
