@@ -47,6 +47,18 @@ export const ResetPassword: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
+          <Link to="/" className="flex justify-center mb-8">
+            <img 
+              src="/logo_black.png" 
+              alt="Stable Ride" 
+              className="h-12 w-12 dark:hidden hover:opacity-80 transition-opacity"
+            />
+            <img 
+              src="/logo_white.png" 
+              alt="Stable Ride" 
+              className="h-12 w-12 hidden dark:block hover:opacity-80 transition-opacity"
+            />
+          </Link>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -74,6 +86,18 @@ export const ResetPassword: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
+        <Link to="/" className="flex justify-center mb-8">
+          <img 
+            src="/logo_black.png" 
+            alt="Stable Ride" 
+            className="h-12 w-12 dark:hidden hover:opacity-80 transition-opacity"
+          />
+          <img 
+            src="/logo_white.png" 
+            alt="Stable Ride" 
+            className="h-12 w-12 hidden dark:block hover:opacity-80 transition-opacity"
+          />
+        </Link>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
