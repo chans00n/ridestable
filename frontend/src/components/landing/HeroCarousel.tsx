@@ -69,18 +69,16 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ onLoginClick, onSignupClick
 
       <div className="relative z-10 flex h-full flex-col px-5 pt-8 pb-10 md:px-10 md:pt-10 md:pb-[60px]">
         <div className="flex items-start justify-between">
-          <div className="flex flex-col gap-4">
-            <img 
-              src="/logo_white.png"
-              alt="Stable Ride" 
-              className="h-4 md:h-6 w-auto object-contain mb-2"
-            />
-            <SlideIndicators
-              total={slides.length}
-              current={currentSlide}
-              onChange={handleSlideChange}
-            />
-          </div>
+          <img 
+            src="/logo_white.png"
+            alt="Stable Ride" 
+            className="h-8 md:h-10 w-auto object-contain"
+          />
+          <SlideIndicators
+            total={slides.length}
+            current={currentSlide}
+            onChange={handleSlideChange}
+          />
         </div>
 
         <div className="flex flex-1 flex-col justify-between">

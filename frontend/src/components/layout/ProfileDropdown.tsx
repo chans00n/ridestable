@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   UserCircleIcon,
-  Cog6ToothIcon,
+  CreditCardIcon,
   MapPinIcon,
   BellIcon,
   ArrowRightOnRectangleIcon,
@@ -60,10 +60,10 @@ export const ProfileDropdown: React.FC = () => {
       }
     },
     {
-      label: 'Account Settings',
-      icon: Cog6ToothIcon,
+      label: 'Payment Methods',
+      icon: CreditCardIcon,
       onClick: () => {
-        navigate('/profile/settings');
+        navigate('/profile/payment-methods');
         setIsOpen(false);
       }
     }
@@ -109,7 +109,7 @@ export const ProfileDropdown: React.FC = () => {
           <div className="border-t border-border">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               <ArrowRightOnRectangleIcon className="h-5 w-5 text-muted-foreground" />
               Sign out

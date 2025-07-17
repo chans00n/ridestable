@@ -29,16 +29,13 @@ export const Layout: React.FC = () => {
                     <img 
                       src="/logo_black.png" 
                       alt="Stable Ride" 
-                      className="h-10 w-10 dark:hidden"
+                      className="h-8 w-8 dark:hidden"
                     />
                     <img 
                       src="/logo_white.png" 
                       alt="Stable Ride" 
-                      className="h-10 w-10 hidden dark:block"
+                      className="h-8 w-8 hidden dark:block"
                     />
-                    <span className="ml-2 text-2xl font-bold text-primary">
-                      Stable Ride
-                    </span>
                   </motion.div>
                 </Link>
                 {user && (
@@ -62,16 +59,6 @@ export const Layout: React.FC = () => {
                       }`}
                     >
                       Book a Ride
-                    </Link>
-                    <Link
-                      to="/bookings"
-                      className={`px-3 py-2 rounded-md text-sm font-medium ${
-                        location.pathname === '/bookings'
-                          ? 'text-primary bg-primary/10'
-                          : 'text-foreground hover:text-primary hover:bg-accent'
-                      }`}
-                    >
-                      Bookings
                     </Link>
                   </div>
                 )}
