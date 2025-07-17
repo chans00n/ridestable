@@ -21,6 +21,9 @@
     },
     "api/schema-test.ts": {
       "maxDuration": 30
+    },
+    "api/webhook-test.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -43,6 +46,10 @@
     {
       "source": "/schema-test",
       "destination": "/api/schema-test"
+    },
+    {
+      "source": "/webhook-test",
+      "destination": "/api/webhook-test"
     },
     {
       "source": "/(.*)",
