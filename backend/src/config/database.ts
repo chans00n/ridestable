@@ -48,7 +48,7 @@ export const prisma = global.prisma || new PrismaClient({
 })
 
 // Prevent multiple instances in serverless environments
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'production') {
   global.prisma = prisma
 }
 
