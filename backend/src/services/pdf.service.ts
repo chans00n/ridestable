@@ -14,9 +14,11 @@ export async function generatePdfReceipt(
     margin: 50
   });
 
-  // Create uploads directory if it doesn't exist
-  const uploadsDir = path.join(process.cwd(), 'uploads', 'receipts');
-  if (!fs.existsSync(uploadsDir)) {
+  // Use /tmp directory for serverless environments
+  const uploadsDir = process.env.VERCEL ? '/tmp' : path.join(process.cwd(), 'uploads', 'receipts');
+  
+  // Create directory only if not in Vercel (local development)
+  if (!process.env.VERCEL && !fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
 
