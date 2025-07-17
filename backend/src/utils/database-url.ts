@@ -3,8 +3,11 @@ export function addConnectionParams(url: string): string {
   const urlObj = new URL(url)
   
   // Add connection parameters for Supabase in serverless
-  // Don't override existing parameters
-  if (!urlObj.searchParams.has('connection_limit')) {
+  // For pooled connections (pgbouncer), don't set connection_limit
+  // as the pooler handles this
+  const isPgBouncer = urlObj.searchParams.has('pgbouncer') || urlObj.port === '6543'
+  
+  if (!isPgBouncer && !urlObj.searchParams.has('connection_limit')) {
     urlObj.searchParams.set('connection_limit', '1')
   }
   
