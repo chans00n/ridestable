@@ -8,12 +8,19 @@
     },
     "api/test.ts": {
       "maxDuration": 30
+    },
+    "api/health.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
     {
       "source": "/api/test",
       "destination": "/api/test"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health"
     },
     {
       "source": "/(.*)",
