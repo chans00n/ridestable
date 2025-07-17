@@ -24,6 +24,9 @@
     },
     "api/register-test.ts": {
       "maxDuration": 30
+    },
+    "api/schema-test.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -42,6 +45,10 @@
     {
       "source": "/register-test",
       "destination": "/api/register-test"
+    },
+    {
+      "source": "/schema-test",
+      "destination": "/api/schema-test"
     },
     {
       "source": "/js-test/(.*)",
