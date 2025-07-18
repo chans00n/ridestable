@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProfileDropdown } from './layout/ProfileDropdown'
 import { ThemeSwitcher } from './ThemeSwitcher'
+import { MobileNavigation } from './layout/MobileNavigation'
 
 export const Layout: React.FC = () => {
   const { user, logout } = useAuth()
@@ -190,6 +191,9 @@ export const Layout: React.FC = () => {
       <main>
         <Outlet />
       </main>
+      
+      {/* Mobile Navigation */}
+      {user && <MobileNavigation />}
     </div>
   )
 }

@@ -8,9 +8,10 @@ import { Toaster } from './components/ui/Toast'
 import { Home } from './pages/Home'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
-import { Dashboard } from './pages/Dashboard'
+import { DashboardNew } from './pages/DashboardNew'
 import { Booking } from './pages/Booking'
 import { BookingNew } from './pages/BookingNew'
+import { Bookings } from './pages/Bookings'
 import { VerifyEmail } from './pages/auth/VerifyEmail'
 import { ForgotPassword } from './pages/auth/ForgotPassword'
 import { ResetPassword } from './pages/auth/ResetPassword'
@@ -19,6 +20,7 @@ import { PaymentPage } from './pages/PaymentPage'
 import { PaymentConfirmation } from './components/payment'
 import { ModifyBooking } from './pages/ModifyBooking'
 import { CancelBooking } from './pages/CancelBooking'
+import { Profile } from './pages/Profile'
 import { ProfileLayout } from './pages/Profile/ProfileLayout'
 import { ProfileGeneral } from './pages/Profile/ProfileGeneral'
 import { ProfileLocations } from './pages/Profile/ProfileLocations'
@@ -71,7 +73,7 @@ function App() {
               path="dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <DashboardNew />
                 </ProtectedRoute>
               }
             />
@@ -88,6 +90,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BookingNew />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="bookings"
+              element={
+                <ProtectedRoute>
+                  <Bookings />
                 </ProtectedRoute>
               }
             />
@@ -127,11 +137,19 @@ function App() {
               path="profile"
               element={
                 <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="profile/*"
+              element={
+                <ProtectedRoute>
                   <ProfileLayout />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<ProfileGeneral />} />
+              <Route path="general" element={<ProfileGeneral />} />
               <Route path="locations" element={<ProfileLocations />} />
               <Route path="notifications" element={<ProfileNotifications />} />
               <Route path="payment-methods" element={<ProfilePaymentMethods />} />
