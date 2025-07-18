@@ -4,7 +4,7 @@ import {
   MapPin, 
   Plus, 
   Briefcase, 
-  Home,
+  Home as HomeIcon,
   Calendar,
   ChevronRight,
   Search
@@ -44,6 +44,7 @@ interface SavedLocation {
   address: string;
   placeId?: string;
   icon: 'home' | 'work' | 'custom';
+  createdAt?: string;
 }
 
 export const DashboardNew: React.FC = () => {
@@ -60,14 +61,26 @@ export const DashboardNew: React.FC = () => {
   const fetchSavedLocations = async () => {
     try {
       const response = await api.get('/dashboard/locations');
+      console.log('Dashboard locations response:', response.data);
       // Transform the API response to match our interface
       const locations = response.data.data.items.map((loc: any) => ({
         id: loc.id,
-        name: loc.type === 'HOME' ? 'Home' : loc.type === 'WORK' ? 'Work' : loc.name,
+        name: loc.locationType === 'home' ? 'Home' : loc.locationType === 'work' ? 'Work' : loc.name,
         address: loc.address,
         placeId: loc.placeId,
-        icon: loc.type.toLowerCase() as 'home' | 'work' | 'custom'
+        icon: (loc.locationType || 'custom') as 'home' | 'work' | 'custom',
+        createdAt: loc.createdAt
       }));
+      
+      // Sort locations so custom locations are ordered by most recent first
+      locations.sort((a: any, b: any) => {
+        // Home and Work always come first
+        if (a.icon === 'home' || a.icon === 'work') return -1;
+        if (b.icon === 'home' || b.icon === 'work') return 1;
+        // Sort custom locations by creation date (most recent first)
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+      
       setSavedLocations(locations);
     } catch (error) {
       console.error('Failed to load saved locations', error);
@@ -171,60 +184,118 @@ export const DashboardNew: React.FC = () => {
           transition={{ delay: 0.3 }}
         >
           <div className="space-y-3">
-            {/* Work Location */}
-            {savedLocations.find(loc => loc.icon === 'work') ? (
-              <button
-                onClick={() => handleSavedLocationClick(savedLocations.find(loc => loc.icon === 'work')!)}
-                className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
-              >
-                <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Briefcase className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">Work</p>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {savedLocations.find(loc => loc.icon === 'work')?.address}
-                  </p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </button>
-            ) : (
-              <button
-                onClick={() => handleAddLocation('work')}
-                className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
-              >
-                <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                  <Briefcase className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">Work</p>
-                  <p className="text-sm text-muted-foreground">Add shortcut</p>
-                </div>
-                <Plus className="h-5 w-5 text-muted-foreground" />
-              </button>
-            )}
+            {/* Home Location */}
+            {(() => {
+              const homeLocation = savedLocations.find(loc => loc.icon === 'home');
+              if (homeLocation) {
+                return (
+                  <button
+                    onClick={() => handleSavedLocationClick(homeLocation)}
+                    className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
+                  >
+                    <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <HomeIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">Home</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {homeLocation.address}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                );
+              }
+              return null;
+            })()}
 
-            {/* Custom Shortcuts */}
-            {savedLocations.filter(loc => loc.icon === 'custom').slice(0, 2).map((location) => (
-              <button
-                key={location.id}
-                onClick={() => handleSavedLocationClick(location)}
-                className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
-              >
-                <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{location.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {location.address}
-                  </p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </button>
-            ))}
+            {/* Work Location or First Custom Location */}
+            {(() => {
+              const workLocation = savedLocations.find(loc => loc.icon === 'work');
+              const customLocations = savedLocations.filter(loc => loc.icon === 'custom');
+              const firstCustomLocation = customLocations[0];
+              
+              if (workLocation) {
+                // Show work location
+                return (
+                  <button
+                    onClick={() => handleSavedLocationClick(workLocation)}
+                    className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
+                  >
+                    <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Briefcase className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">Work</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {workLocation.address}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                );
+              } else if (firstCustomLocation) {
+                // Show most recent custom location if no work location
+                return (
+                  <button
+                    onClick={() => handleSavedLocationClick(firstCustomLocation)}
+                    className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
+                  >
+                    <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <MapPin className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">{firstCustomLocation.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {firstCustomLocation.address}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                );
+              }
+              return null;
+            })()}
 
-            {/* Add Custom Shortcut */}
+            {/* Additional Custom Location */}
+            {(() => {
+              const workLocation = savedLocations.find(loc => loc.icon === 'work');
+              const customLocations = savedLocations.filter(loc => loc.icon === 'custom');
+              
+              // Determine which custom location to show based on what's already displayed
+              let customLocationToShow = null;
+              
+              if (workLocation && customLocations[0]) {
+                // If work exists, show the first custom location
+                customLocationToShow = customLocations[0];
+              } else if (!workLocation && customLocations[1]) {
+                // If no work location and we already showed first custom, show second
+                customLocationToShow = customLocations[1];
+              }
+              
+              if (customLocationToShow) {
+                return (
+                  <button
+                    onClick={() => handleSavedLocationClick(customLocationToShow)}
+                    className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
+                  >
+                    <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <MapPin className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">{customLocationToShow.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {customLocationToShow.address}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Add Saved Location Button */}
             <button
               onClick={() => handleAddLocation('custom')}
               className="w-full flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-accent transition-colors text-left"
@@ -233,8 +304,8 @@ export const DashboardNew: React.FC = () => {
                 <Plus className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-foreground">Custom shortcut</p>
-                <p className="text-sm text-muted-foreground">Add shortcut</p>
+                <p className="font-medium text-foreground">Add saved location</p>
+                <p className="text-sm text-muted-foreground">Save a frequent destination</p>
               </div>
             </button>
           </div>

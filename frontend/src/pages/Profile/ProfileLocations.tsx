@@ -56,8 +56,16 @@ export const ProfileLocations: React.FC = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await api.get('/locations/user');
-      setLocations(response.data.locations || []);
+      const response = await api.get('/dashboard/locations');
+      const locations = response.data.data.items.map((loc: any) => ({
+        id: loc.id,
+        name: loc.name,
+        address: loc.address,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        isDefault: loc.isDefault
+      }));
+      setLocations(locations);
     } catch (error) {
       showToast.error('Failed to load saved locations');
       setLocations([]);
@@ -71,19 +79,24 @@ export const ProfileLocations: React.FC = () => {
     
     try {
       if (editingLocation) {
-        await api.put(`/locations/user/${editingLocation.id}`, { name: formData.name });
+        await api.put(`/dashboard/locations/${editingLocation.id}`, { 
+          name: formData.name,
+          isDefault: formData.isDefault
+        });
         showToast.success('Location updated successfully');
       } else {
         // For new locations, we need to geocode the address first
         const geocodeResponse = await api.post('/locations/geocode', { address: formData.address });
         const locationData = geocodeResponse.data.location;
         
-        await api.post('/locations/user', {
+        await api.post('/dashboard/locations', {
           name: formData.name,
           address: locationData.address,
-          lat: locationData.lat,
-          lng: locationData.lng,
-          placeId: locationData.placeId
+          latitude: locationData.lat,
+          longitude: locationData.lng,
+          locationType: formData.name.toLowerCase() === 'home' ? 'home' : 
+                        formData.name.toLowerCase() === 'work' ? 'work' : 'other',
+          isDefault: formData.isDefault
         });
         showToast.success('Location added successfully');
       }
@@ -101,7 +114,7 @@ export const ProfileLocations: React.FC = () => {
     if (!confirm('Are you sure you want to delete this location?')) return;
     
     try {
-      await api.delete(`/locations/user/${id}`);
+      await api.delete(`/dashboard/locations/${id}`);
       showToast.success('Location deleted successfully');
       await fetchLocations();
     } catch (error) {

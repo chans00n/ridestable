@@ -32,8 +32,19 @@ export const SavedLocations: React.FC<SavedLocationsProps> = ({
 
   const fetchLocations = async () => {
     try {
-      const response = await api.get('/locations/user');
-      setLocations(response.data.locations);
+      const response = await api.get('/dashboard/locations');
+      const locations = response.data.data.items.map((loc: any) => ({
+        id: loc.id,
+        name: loc.name,
+        address: loc.address,
+        lat: loc.latitude ? parseFloat(loc.latitude.toString()) : undefined,
+        lng: loc.longitude ? parseFloat(loc.longitude.toString()) : undefined,
+        type: loc.locationType,
+        userId: loc.userId,
+        createdAt: loc.createdAt,
+        updatedAt: loc.updatedAt
+      }));
+      setLocations(locations);
     } catch (error) {
       console.error('Failed to fetch locations:', error);
     } finally {
@@ -51,15 +62,16 @@ export const SavedLocations: React.FC<SavedLocationsProps> = ({
     if (!name) return;
 
     try {
-      const response = await api.post('/locations/user', {
+      const response = await api.post('/dashboard/locations', {
         address: currentLocation.address,
-        lat: currentLocation.lat,
-        lng: currentLocation.lng,
-        placeId: currentLocation.placeId,
+        latitude: currentLocation.lat,
+        longitude: currentLocation.lng,
         name,
+        locationType: name.toLowerCase() === 'home' ? 'home' : 
+                      name.toLowerCase() === 'work' ? 'work' : 'other'
       });
 
-      setLocations([response.data.location, ...locations]);
+      await fetchLocations(); // Refetch to get the updated list
       showToast.success('Location saved successfully!');
     } catch (error: any) {
       console.error('Save location error:', error);
@@ -75,7 +87,7 @@ export const SavedLocations: React.FC<SavedLocationsProps> = ({
     }
 
     try {
-      const response = await api.put(`/locations/user/${id}`, {
+      const response = await api.put(`/dashboard/locations/${id}`, {
         name: editName,
       });
       
@@ -93,7 +105,7 @@ export const SavedLocations: React.FC<SavedLocationsProps> = ({
     if (!confirm('Are you sure you want to delete this location?')) return;
 
     try {
-      await api.delete(`/locations/user/${id}`);
+      await api.delete(`/dashboard/locations/${id}`);
       setLocations(locations.filter(loc => loc.id !== id));
       showToast.success('Location deleted');
     } catch (error) {
@@ -105,6 +117,7 @@ export const SavedLocations: React.FC<SavedLocationsProps> = ({
     switch (type) {
       case 'home': return '🏠';
       case 'work': return '💼';
+      case 'other': return '📍';
       default: return '📍';
     }
   };
