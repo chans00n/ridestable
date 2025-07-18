@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
+import { CurrentLocationMap } from '../components/map/CurrentLocationMap';
 
 // Get greeting based on time of day
 const getGreeting = () => {
@@ -272,7 +273,7 @@ export const DashboardNew: React.FC = () => {
           </Card>
         </motion.div>
 
-        {/* Current Location Map Placeholder */}
+        {/* Current Location Map */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -280,9 +281,7 @@ export const DashboardNew: React.FC = () => {
         >
           <div className="bg-card rounded-lg p-4">
             <h3 className="font-semibold text-foreground mb-3">You are here</h3>
-            <div className="bg-muted rounded-lg h-48 flex items-center justify-center">
-              <MapPin className="h-8 w-8 text-muted-foreground" />
-            </div>
+            <CurrentLocationMap height="12rem" />
           </div>
         </motion.div>
       </div>

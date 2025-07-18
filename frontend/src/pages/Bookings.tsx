@@ -120,7 +120,11 @@ export const Bookings: React.FC = () => {
         </div>
 
         <div className="flex justify-between items-center mt-4 pt-4 border-t">
-          <p className="font-semibold">${booking.totalAmount.toFixed(2)}</p>
+          <p className="font-semibold">
+            ${typeof booking.totalAmount === 'number' 
+              ? booking.totalAmount.toFixed(2) 
+              : parseFloat(booking.totalAmount || '0').toFixed(2)}
+          </p>
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </div>
       </CardContent>
