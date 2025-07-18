@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { BookingDetailsModal } from '../components/ui/BookingDetailsModal';
 
 interface Booking {
   id: string;
@@ -36,6 +37,8 @@ export const Bookings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [pastBookings, setPastBookings] = useState<Booking[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -80,10 +83,21 @@ export const Bookings: React.FC = () => {
     return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
+  const handleBookingClick = async (booking: Booking) => {
+    try {
+      // Fetch full booking details
+      const response = await api.get(`/bookings/${booking.id}`);
+      setSelectedBooking(response.data.data);
+      setModalOpen(true);
+    } catch (error) {
+      showToast.error('Failed to load booking details');
+    }
+  };
+
   const BookingCard = ({ booking }: { booking: Booking }) => (
     <Card 
       className="cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => navigate(`/bookings/${booking.id}`)}
+      onClick={() => handleBookingClick(booking)}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-3">
@@ -103,11 +117,19 @@ export const Bookings: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>{format(new Date(booking.scheduledDateTime), 'MMM d, yyyy')}</span>
+            <span>
+              {booking.scheduledDateTime && !isNaN(new Date(booking.scheduledDateTime).getTime())
+                ? format(new Date(booking.scheduledDateTime), 'MMM d, yyyy')
+                : 'Date not available'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{format(new Date(booking.scheduledDateTime), 'h:mm a')}</span>
+            <span>
+              {booking.scheduledDateTime && !isNaN(new Date(booking.scheduledDateTime).getTime())
+                ? format(new Date(booking.scheduledDateTime), 'h:mm a')
+                : 'Time not available'}
+            </span>
           </div>
           <div className="flex items-start gap-2 text-sm">
             <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -211,6 +233,24 @@ export const Bookings: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Booking Details Modal */}
+      <BookingDetailsModal
+        booking={selectedBooking}
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedBooking(null);
+        }}
+        onModify={(bookingId) => {
+          setModalOpen(false);
+          navigate(`/bookings/${bookingId}/modify`);
+        }}
+        onCancel={(bookingId) => {
+          setModalOpen(false);
+          navigate(`/bookings/${bookingId}/cancel`);
+        }}
+      />
     </div>
   );
 };

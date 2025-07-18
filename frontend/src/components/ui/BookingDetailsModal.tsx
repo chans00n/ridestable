@@ -67,6 +67,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   };
 
   const formatDateTime = (dateTime: string) => {
+    if (!dateTime || isNaN(new Date(dateTime).getTime())) {
+      return 'Date/Time not available';
+    }
     return format(new Date(dateTime), 'PPP p');
   };
 
@@ -283,7 +286,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         <DialogFooter>
           <div className="flex flex-wrap gap-2 justify-end w-full">
             {/* Modify Button */}
-            {booking.canModify && onModify && (
+            {(booking.status === 'CONFIRMED' || booking.status === 'PENDING') && onModify && (
               <Button onClick={() => onModify(booking.id)}>
                 <PencilIcon className="h-4 w-4 mr-2" />
                 Modify Booking
@@ -291,7 +294,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             )}
 
             {/* Cancel Button */}
-            {booking.canCancel && onCancel && (
+            {(booking.status === 'CONFIRMED' || booking.status === 'PENDING') && onCancel && (
               <Button
                 variant="destructive"
                 onClick={() => onCancel(booking.id)}

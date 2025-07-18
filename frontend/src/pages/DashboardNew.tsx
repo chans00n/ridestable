@@ -90,19 +90,15 @@ export const DashboardNew: React.FC = () => {
   };
 
   const handleQuickSearch = () => {
-    navigate('/booking');
+    navigate('/booking/new?service=one-way');
   };
 
   const handleScheduleAhead = () => {
-    navigate('/booking');
-  };
-
-  const handleRequestForFriend = () => {
-    navigate('/booking', { state: { forFriend: true } });
+    navigate('/booking/new?service=one-way');
   };
 
   const handleSavedLocationClick = (location: SavedLocation) => {
-    navigate('/booking', { 
+    navigate('/booking/new?service=one-way', { 
       state: { 
         dropoffAddress: location.address,
         dropoffPlaceId: location.placeId 
@@ -117,7 +113,8 @@ export const DashboardNew: React.FC = () => {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Hero Section with Greeting */}
-      <div className="bg-gradient-to-b from-primary/10 to-background px-4 pt-8 pb-6">
+      <div className="bg-gradient-to-b from-primary/10 to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -149,40 +146,19 @@ export const DashboardNew: React.FC = () => {
             />
           </div>
         </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div 
-          className="grid grid-cols-2 gap-3 mt-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Button
-            variant="outline"
-            className="justify-start gap-2 py-3"
-            onClick={handleScheduleAhead}
-          >
-            <Calendar className="h-4 w-4" />
-            Schedule ahead
-          </Button>
-          <Button
-            variant="outline"
-            className="justify-start gap-2 py-3"
-            onClick={handleRequestForFriend}
-          >
-            <Plus className="h-4 w-4" />
-            Request for a friend
-          </Button>
-        </motion.div>
+        </div>
       </div>
 
-      <div className="px-4 space-y-6">
-        {/* Saved Locations */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Saved Locations and Map */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Saved Locations */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
           <div className="space-y-3">
             {/* Home Location */}
             {(() => {
@@ -308,53 +284,53 @@ export const DashboardNew: React.FC = () => {
                 <p className="text-sm text-muted-foreground">Save a frequent destination</p>
               </div>
             </button>
-          </div>
-        </motion.div>
-
-        {/* Schedule Ahead CTA Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 border-0">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    Plan ahead. Ride relaxed.
-                  </h3>
-                  <p className="text-white/90 text-sm leading-relaxed mb-4">
-                    Schedule your ride to the airport. Get up to $100 in credit if it's 10+ min late. 
-                    That's our on-time pickup promise. Terms apply.
-                  </p>
-                  <Button
-                    variant="secondary"
-                    className="bg-white text-orange-600 hover:bg-white/90"
-                    onClick={handleScheduleAhead}
-                  >
-                    Schedule a ride →
-                  </Button>
-                </div>
-                <div className="hidden sm:block">
-                  <div className="w-32 h-32 bg-white/20 rounded-full" />
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+            </motion.div>
 
-        {/* Current Location Map */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="bg-card rounded-lg p-4">
-            <h3 className="font-semibold text-foreground mb-3">You are here</h3>
-            <CurrentLocationMap height="12rem" />
+            {/* Current Location Map */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <div className="bg-card rounded-lg p-4">
+                <h3 className="font-semibold text-foreground mb-3">You are here</h3>
+                <CurrentLocationMap height="12rem" />
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+
+          {/* Right Column - Schedule Ahead CTA */}
+          <div className="lg:col-span-1">
+            {/* Schedule Ahead CTA Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="overflow-hidden bg-gradient-to-br from-primary to-primary/80 border-0">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xl lg:text-2xl font-bold text-primary-foreground">
+                      Plan ahead. Ride relaxed.
+                    </h3>
+                    <p className="text-primary-foreground/90 text-sm leading-relaxed">
+                      Schedule your ride to the airport. Get up to $100 in credit if it's 10+ min late. 
+                      That's our on-time pickup promise. Terms apply.
+                    </p>
+                    <Button
+                      variant="secondary"
+                      className="w-full bg-background text-foreground hover:bg-background/90"
+                      onClick={handleScheduleAhead}
+                    >
+                      Schedule a ride →
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );

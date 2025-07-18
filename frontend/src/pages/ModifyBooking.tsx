@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CalendarIcon, MapPinIcon, TruckIcon } from '@heroicons/react/24/outline';
+import { Calendar as CalendarIcon, MapPin as MapPinIcon, Truck as TruckIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '../services/api';
 import { showToast } from '../components/ui/Toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface BookingDetails {
   id: string;
@@ -168,18 +173,18 @@ export const ModifyBooking: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-background py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-card shadow rounded-lg">
             {/* Header Skeleton */}
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-border">
               <Skeleton className="h-8 w-48 mb-1" />
               <Skeleton className="h-4 w-32" />
             </div>
 
             <div className="p-6 space-y-6">
               {/* Current Booking Details Skeleton */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-muted rounded-lg p-4">
                 <Skeleton className="h-5 w-32 mb-3" />
                 <div className="space-y-2">
                   <div className="flex items-center">
@@ -261,48 +266,49 @@ export const ModifyBooking: React.FC = () => {
   const canModify = booking.confirmation && new Date() < new Date(booking.confirmation.modificationDeadline);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Modify Booking</h1>
-            <p className="mt-1 text-sm text-gray-600">
+        <div className="bg-card shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-border">
+            <h1 className="text-2xl font-bold text-foreground">Modify Booking</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Reference: {booking.confirmation?.bookingReference}
             </p>
           </div>
 
           {!canModify ? (
             <div className="p-6">
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-red-800">
+              <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
+                <p className="text-destructive">
                   This booking cannot be modified. The modification deadline has passed.
                 </p>
-                <p className="mt-2 text-sm text-red-600">
+                <p className="mt-2 text-sm text-destructive/80">
                   Modifications are allowed up to 2 hours before pickup time.
                 </p>
               </div>
-              <button
+              <Button
                 onClick={() => navigate('/dashboard')}
-                className="mt-4 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                variant="outline"
+                className="mt-4"
               >
                 Back to Dashboard
-              </button>
+              </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Current Booking Details */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium text-gray-900 mb-3">Current Booking</h3>
+              <div className="bg-muted rounded-lg p-4">
+                <h3 className="font-medium text-foreground mb-3">Current Booking</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center text-gray-600">
+                  <div className="flex items-center text-muted-foreground">
                     <CalendarIcon className="h-4 w-4 mr-2" />
                     {format(new Date(booking.scheduledDateTime), 'PPpp')}
                   </div>
-                  <div className="flex items-center text-gray-600">
+                  <div className="flex items-center text-muted-foreground">
                     <MapPinIcon className="h-4 w-4 mr-2" />
                     {booking.pickupAddress} → {booking.dropoffAddress}
                   </div>
-                  <div className="flex items-center text-gray-600">
+                  <div className="flex items-center text-muted-foreground">
                     <TruckIcon className="h-4 w-4 mr-2" />
                     {booking.serviceType.replace('_', ' ')}
                   </div>
@@ -311,10 +317,10 @@ export const ModifyBooking: React.FC = () => {
 
               {/* Date and Time */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Date & Time</h3>
+                <h3 className="text-lg font-medium text-foreground mb-3">Date & Time</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-foreground">
                       Pickup Date
                     </label>
                     <input
@@ -322,18 +328,18 @@ export const ModifyBooking: React.FC = () => {
                       value={newPickupDate}
                       onChange={(e) => setNewPickupDate(e.target.value)}
                       min={format(new Date(), 'yyyy-MM-dd')}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:ring-primary focus:border-primary"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-foreground">
                       Pickup Time
                     </label>
                     <input
                       type="time"
                       value={newPickupTime}
                       onChange={(e) => setNewPickupTime(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:ring-primary focus:border-primary"
                     />
                   </div>
                 </div>
@@ -341,28 +347,28 @@ export const ModifyBooking: React.FC = () => {
 
               {/* Locations */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Locations</h3>
+                <h3 className="text-lg font-medium text-foreground mb-3">Locations</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-foreground">
                       Pickup Address
                     </label>
                     <input
                       type="text"
                       value={newPickupAddress}
                       onChange={(e) => setNewPickupAddress(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:ring-primary focus:border-primary"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-foreground">
                       Dropoff Address
                     </label>
                     <input
                       type="text"
                       value={newDropoffAddress}
                       onChange={(e) => setNewDropoffAddress(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:ring-primary focus:border-primary"
                     />
                   </div>
                 </div>
@@ -370,11 +376,11 @@ export const ModifyBooking: React.FC = () => {
 
               {/* Service Type */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Service Type</h3>
+                <h3 className="text-lg font-medium text-foreground mb-3">Service Type</h3>
                 <select
                   value={newServiceType}
                   onChange={(e) => setNewServiceType(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:ring-primary focus:border-primary"
                 >
                   <option value="ONE_WAY">One Way</option>
                   <option value="ROUNDTRIP">Round Trip</option>
@@ -384,21 +390,21 @@ export const ModifyBooking: React.FC = () => {
 
               {/* Reason */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-foreground">
                   Reason for Modification (Optional)
                 </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full rounded-md border-border bg-background text-foreground shadow-sm focus:ring-primary focus:border-primary"
                   placeholder="Please provide a reason for this modification..."
                 />
               </div>
 
               {/* Notice */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                <p className="text-sm text-yellow-800">
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-md p-4">
+                <p className="text-sm text-yellow-600 dark:text-yellow-400">
                   <strong>Note:</strong> Modifications may incur additional fees. Major changes 
                   (date/time or service type) include a $10 modification fee.
                 </p>
@@ -406,20 +412,19 @@ export const ModifyBooking: React.FC = () => {
 
               {/* Actions */}
               <div className="flex justify-between">
-                <button
+                <Button
                   type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  variant="outline"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={!hasChanges() || calculating}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {calculating ? 'Calculating...' : 'Review Changes'}
-                </button>
+                </Button>
               </div>
             </form>
           )}
